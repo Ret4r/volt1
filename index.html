@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="uk" class="dark">
+<head><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ВольтЗапас — Павербанки та ДБЖ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .neon-glow { box-shadow: 0 0 25px rgba(6, 182, 212, 0.35); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
+    .field { width: 100%; padding: .55rem .875rem; border-radius: .75rem; font-size: .875rem; background: #0f172a; border: 1px solid #334155; color: inherit; }
+    .field:focus { outline: none; border-color: #06b6d4; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* Light theme */
+    html.light body { background: #f1f5f9; color: #0f172a; }
+    html.light .glass { background: rgba(255,255,255,0.85); border-color: rgba(15,23,42,0.1); }
+    html.light .bg-slate-950 { background-color: #f1f5f9 !important; }
+    html.light .bg-slate-900, html.light .bg-slate-900\/80, html.light .bg-slate-900\/60 { background-color: #ffffff !important; }
+    html.light .bg-slate-950\/60, html.light .bg-slate-950\/80 { background-color: rgba(255,255,255,0.9) !important; }
+    html.light .bg-slate-800 { background-color: #e2e8f0 !important; }
+    html.light .hover\:bg-slate-800:hover, html.light .hover\:bg-slate-700:hover { background-color: #cbd5e1 !important; }
+    html.light .text-white:not(.keep-white):not(.keep-white *) { color: #0f172a !important; }
+    html.light .text-slate-100, html.light .text-slate-200 { color: #1e293b !important; }
+    html.light .text-slate-300 { color: #334155 !important; }
+    html.light .text-slate-400 { color: #475569 !important; }
+    html.light .text-slate-500, html.light .text-slate-600 { color: #64748b !important; }
+    html.light .text-cyan-400 { color: #0e7490 !important; }
+    html.light .text-amber-400 { color: #b45309 !important; }
+    html.light .border-slate-700, html.light .border-slate-700\/60 { border-color: #cbd5e1 !important; }
+    html.light .border-slate-800, html.light .border-slate-800\/80 { border-color: #e2e8f0 !important; }
+    html.light .divide-slate-800\/60 > * + * { border-color: #e2e8f0 !important; }
+    html.light .field { background: #ffffff; border-color: #cbd5e1; }
+    html.light #heroSection { background: linear-gradient(to bottom, #f1f5f9, #e0f2fe, #f1f5f9) !important; }
+    html.light .backdrop-dim { background: rgba(15,23,42,0.4) !important; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen transition-colors duration-300 w-full overflow-x-hidden">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 glass w-full">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+      <a href="#" onclick="showView('home'); return false;" class="flex items-center gap-2 sm:gap-3 group min-w-0">
+        <div class="keep-white w-9 h-9 sm:w-11 sm:h-11 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center neon-glow group-hover:scale-105 transition">
+          <i class="fa-solid fa-bolt text-base sm:text-xl text-white" aria-hidden="true"></i>
+        </div>
+        <div class="min-w-0">
+          <span class="block truncate text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent" data-s="siteName"></span>
+          <span class="hidden sm:block text-[10px] text-slate-400 font-medium tracking-widest uppercase" data-s="tagline"></span>
+        </div>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-1" aria-label="Головне меню">
+        <button onclick="showView('home','powerbank')" data-nav="powerbank" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition">Павербанки</button>
+        <button onclick="showView('home','ups')" data-nav="ups" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition">ДБЖ</button>
+        <button onclick="showView('reviews')" data-nav="reviews" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition">Відгуки</button>
+        <button onclick="showView('contacts')" data-nav="contacts" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition">Контакти</button>
+      </nav>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="toggleTheme()" class="w-11 h-11 flex items-center justify-center rounded-xl border border-slate-800 hover:bg-slate-800 text-slate-300 transition" aria-label="Змінити тему" title="Змінити тему">
+          <i class="fa-solid fa-sun text-base sm:text-lg" id="themeIcon" aria-hidden="true"></i>
+        </button>
+        <button onclick="toggleCart(true)" class="keep-white relative w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white neon-glow hover:opacity-90 transition" aria-label="Кошик">
+          <i class="fa-solid fa-cart-shopping text-base sm:text-lg" aria-hidden="true"></i>
+          <span id="cartBadge" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile nav -->
+    <nav class="md:hidden border-t border-slate-800 overflow-x-auto no-scrollbar" aria-label="Мобільне меню">
+      <div class="flex items-center gap-1 px-3 py-2 w-max">
+        <button onclick="showView('home','powerbank')" data-nav="powerbank" class="nav-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition">Павербанки</button>
+        <button onclick="showView('home','ups')" data-nav="ups" class="nav-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition">ДБЖ</button>
+        <button onclick="showView('reviews')" data-nav="reviews" class="nav-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition">Відгуки</button>
+        <button onclick="showView('contacts')" data-nav="contacts" class="nav-btn px-3.5 py-1.5 rounded-lg text-sm font-semibold transition">Контакти</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HOME VIEW -->
+  <div id="view-home" class="view">
+    <section id="heroSection" class="relative overflow-hidden pt-12 pb-16 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto space-y-6">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-xs font-semibold tracking-wide uppercase">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> <span data-s="heroBadge"></span>
+          </div>
+          <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight text-balance">
+            <span data-s="heroTitle"></span> <span class="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent" data-s="heroAccent"></span>
+          </h1>
+          <p class="text-slate-400 text-base sm:text-lg text-pretty" data-s="heroText"></p>
+          <div class="flex flex-wrap justify-center gap-3 pt-2">
+            <a href="#catalog" class="keep-white px-7 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold neon-glow hover:opacity-90 transition">
+              Обрати товар <i class="fa-solid fa-arrow-right ml-2" aria-hidden="true"></i>
+            </a>
+            <a data-tg target="_blank" rel="noopener" class="px-6 py-3.5 rounded-xl border border-slate-700 bg-slate-900/80 text-slate-300 font-semibold hover:border-cyan-500 transition flex items-center gap-2">
+              <i class="fa-brands fa-telegram text-sky-400 text-lg" aria-hidden="true"></i> <span>@<span data-s="telegram"></span></span>
+            </a>
+          </div>
+          <div class="flex flex-wrap justify-center gap-2 text-xs sm:text-sm">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Павербанки в наявності — відправка 1–2 дні</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400"><i class="fa-regular fa-clock" aria-hidden="true"></i> Під замовлення дешевше (≈ 3 тижні)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-28" id="catalog">
+      <div class="flex flex-col gap-5 mb-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-white tracking-tight" id="catalogTitle">Каталог</h2>
+            <p class="text-slate-400 text-sm" id="catalogSubtitle"></p>
+          </div>
+          <div class="relative w-full md:max-w-xs">
+            <label for="searchInput" class="sr-only">Пошук товару</label>
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true"></i>
+            <input type="search" id="searchInput" oninput="renderProducts()" placeholder="Пошук товару..." class="field pl-10">
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Категорії">
+          <button onclick="setCategory('powerbank')" data-cat="powerbank" class="cat-btn px-4 py-2 rounded-xl border text-sm font-semibold transition"><i class="fa-solid fa-battery-full mr-1.5" aria-hidden="true"></i>Павербанки</button>
+          <button onclick="setCategory('ups')" data-cat="ups" class="cat-btn px-4 py-2 rounded-xl border text-sm font-semibold transition"><i class="fa-solid fa-plug-circle-bolt mr-1.5" aria-hidden="true"></i>ДБЖ</button>
+          <span class="w-px h-6 bg-slate-800 mx-1 hidden sm:block" id="capDivider"></span>
+          <div class="flex flex-wrap gap-2" id="capFilters">
+            <button onclick="setFilter('all')" data-filter="all" class="filter-btn px-3.5 py-2 rounded-xl border text-sm font-medium transition">Всі</button>
+            <button onclick="setFilter('10000')" data-filter="10000" class="filter-btn px-3.5 py-2 rounded-xl border text-sm font-medium transition">10 000 мАг</button>
+            <button onclick="setFilter('20000')" data-filter="20000" class="filter-btn px-3.5 py-2 rounded-xl border text-sm font-medium transition">20 000 мАг</button>
+            <button onclick="setFilter('30000')" data-filter="30000" class="filter-btn px-3.5 py-2 rounded-xl border text-sm font-medium transition">30 000+ мАг</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+      <p id="emptyState" class="hidden text-center text-slate-400 py-16">Товарів не знайдено.</p>
+    </main>
+  </div>
+
+  <!-- REVIEWS VIEW -->
+  <section id="view-reviews" class="view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-white tracking-tight">Відгуки покупців</h2>
+        <p class="text-slate-400 text-sm">Реальні враження від наших павербанків та ДБЖ</p>
+      </div>
+      <div class="glass rounded-2xl px-5 py-3 flex items-center gap-3">
+        <span class="text-3xl font-extrabold text-white" id="avgRating">0</span>
+        <div>
+          <div class="text-amber-400 text-sm" id="avgStars"></div>
+          <div class="text-xs text-slate-400" id="reviewCount"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div id="reviewList" class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 content-start"></div>
+
+      <form onsubmit="addReview(event)" class="glass rounded-2xl p-6 space-y-4 h-fit">
+        <h3 class="text-lg font-bold text-white">Залишити відгук</h3>
+        <div>
+          <label for="revName" class="block text-xs font-semibold text-slate-400 mb-1">Ваше ім&apos;я та місто</label>
+          <input id="revName" required maxlength="60" class="field" placeholder="Ірина, Львів">
+        </div>
+        <div>
+          <label for="revRating" class="block text-xs font-semibold text-slate-400 mb-1">Оцінка</label>
+          <select id="revRating" class="field">
+            <option value="5">5 — Відмінно</option>
+            <option value="4">4 — Добре</option>
+            <option value="3">3 — Нормально</option>
+            <option value="2">2 — Погано</option>
+            <option value="1">1 — Жахливо</option>
+          </select>
+        </div>
+        <div>
+          <label for="revText" class="block text-xs font-semibold text-slate-400 mb-1">Відгук</label>
+          <textarea id="revText" required maxlength="600" rows="4" class="field" placeholder="Розкажіть про ваш досвід..."></textarea>
+        </div>
+        <button type="submit" class="keep-white w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl neon-glow hover:opacity-90 transition">Надіслати відгук</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- CONTACTS VIEW -->
+  <section id="view-contacts" class="view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-8">
+      <h2 class="text-3xl font-bold text-white tracking-tight">Контакти</h2>
+      <p class="text-slate-400 text-sm">Відповімо на питання, допоможемо з вибором та оформимо передзамовлення</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 content-start">
+        <a data-tg target="_blank" rel="noopener" class="glass rounded-2xl p-5 flex items-start gap-4 hover:border-cyan-500/50 transition">
+          <span class="w-11 h-11 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0"><i class="fa-brands fa-telegram text-xl" aria-hidden="true"></i></span>
+          <span><span class="block text-xs text-slate-400 uppercase tracking-wide">Telegram</span><span class="block font-bold text-white">@<span data-s="telegram"></span></span><span class="block text-xs text-slate-400 mt-1">Найшвидший спосіб зв&apos;язку</span></span>
+        </a>
+        <a id="phoneLink" class="glass rounded-2xl p-5 flex items-start gap-4 hover:border-cyan-500/50 transition">
+          <span class="w-11 h-11 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-phone text-lg" aria-hidden="true"></i></span>
+          <span><span class="block text-xs text-slate-400 uppercase tracking-wide">Телефон</span><span class="block font-bold text-white" data-s="phone"></span><span class="block text-xs text-slate-400 mt-1">Дзвінки та Viber</span></span>
+        </a>
+        <a id="emailLink" class="glass rounded-2xl p-5 flex items-start gap-4 hover:border-cyan-500/50 transition">
+          <span class="w-11 h-11 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-envelope text-lg" aria-hidden="true"></i></span>
+          <span class="min-w-0"><span class="block text-xs text-slate-400 uppercase tracking-wide">Email</span><span class="block font-bold text-white break-all" data-s="email"></span><span class="block text-xs text-slate-400 mt-1">Для юр. осіб та опту</span></span>
+        </a>
+        <div class="glass rounded-2xl p-5 flex items-start gap-4">
+          <span class="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-location-dot text-lg" aria-hidden="true"></i></span>
+          <span><span class="block text-xs text-slate-400 uppercase tracking-wide">Адреса та графік</span><span class="block font-bold text-white" data-s="address"></span><span class="block text-xs text-slate-400 mt-1" data-s="hours"></span></span>
+        </div>
+        <div class="sm:col-span-2 glass rounded-2xl p-5 flex items-start gap-4 border-amber-500/30">
+          <span class="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0"><i class="fa-regular fa-clock text-lg" aria-hidden="true"></i></span>
+          <span><span class="block font-bold text-white">Наявність і передзамовлення</span><span class="block text-sm text-slate-400 mt-1">Товари в наявності відправляємо за 1–2 дні. Якщо можете зачекати — оформіть передзамовлення дешевше та запропонуйте свою ціну, доставка приблизно через 3 тижні.</span></span>
+        </div>
+      </div>
+
+      <div class="glass rounded-2xl p-6 h-fit">
+        <form id="contactForm" onsubmit="sendContact(event)" class="space-y-4">
+          <h3 class="text-lg font-bold text-white">Написати нам</h3>
+          <div>
+            <label for="ctName" class="block text-xs font-semibold text-slate-400 mb-1">Ім&apos;я</label>
+            <input id="ctName" required maxlength="60" autocomplete="name" class="field">
+          </div>
+          <div>
+            <label for="ctPhone" class="block text-xs font-semibold text-slate-400 mb-1">Телефон</label>
+            <input id="ctPhone" type="tel" required maxlength="20" autocomplete="tel" class="field" placeholder="+380">
+          </div>
+          <div>
+            <label for="ctMsg" class="block text-xs font-semibold text-slate-400 mb-1">Повідомлення</label>
+            <textarea id="ctMsg" rows="4" required maxlength="800" class="field"></textarea>
+          </div>
+          <button type="submit" class="keep-white w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl neon-glow hover:opacity-90 transition">
+            <i class="fa-solid fa-paper-plane mr-1.5" aria-hidden="true"></i> Надіслати заявку
+          </button>
+        </form>
+
+        <div id="contactDone" class="hidden space-y-4 text-center" role="status" aria-live="polite">
+          <span class="mx-auto w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-check text-2xl" aria-hidden="true"></i></span>
+          <h3 class="text-lg font-bold text-white">Заявку прийнято</h3>
+          <p class="text-sm text-slate-400">Щоб отримати відповідь швидше, надішліть це повідомлення нам у Telegram — текст уже підготовлено.</p>
+          <a id="ctTgLink" target="_blank" rel="noopener" class="keep-white flex items-center justify-center gap-2 w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl transition">
+            <i class="fa-brands fa-telegram text-lg" aria-hidden="true"></i> <span>Відкрити чат @<span data-s="telegram"></span></span>
+          </a>
+          <button type="button" onclick="copyContactText()" class="w-full py-2.5 border border-slate-700 text-slate-300 rounded-xl hover:border-cyan-500 transition text-sm"><i class="fa-regular fa-copy mr-1.5" aria-hidden="true"></i> Скопіювати текст</button>
+          <button type="button" onclick="resetContact()" class="text-xs text-slate-400 hover:text-cyan-400">Надіслати ще одну заявку</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEVELOPER CABINET -->
+  <section id="view-admin" class="view hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+      <div>
+        <h2 class="text-2xl font-bold text-white flex items-center gap-3"><i class="fa-solid fa-code text-cyan-400" aria-hidden="true"></i> Кабінет розробника</h2>
+        <p class="text-slate-400 text-sm">Керування товарами, текстами сайту та відгуками</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="resetAll()" class="px-4 py-2 border border-red-500/40 text-red-400 rounded-xl hover:bg-red-500/10 transition text-sm"><i class="fa-solid fa-rotate-left mr-1" aria-hidden="true"></i> Скинути все</button>
+        <button onclick="logoutAdmin()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition text-sm"><i class="fa-solid fa-right-from-bracket mr-1" aria-hidden="true"></i> Вийти</button>
+      </div>
+    </div>
+
+    <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar" role="tablist">
+      <button onclick="setAdminTab('requests')" data-atab="requests" class="atab-btn px-4 py-2 rounded-xl border text-sm font-semibold transition whitespace-nowrap"><i class="fa-solid fa-inbox mr-1.5" aria-hidden="true"></i>Заявки <span id="reqBadge" class="keep-white hidden ml-1 px-1.5 py-0.5 rounded-md bg-red-500 text-white text-[10px]">0</span></button>
+      <button onclick="setAdminTab('products')" data-atab="products" class="atab-btn px-4 py-2 rounded-xl border text-sm font-semibold transition whitespace-nowrap"><i class="fa-solid fa-boxes-stacked mr-1.5" aria-hidden="true"></i>Товари</button>
+      <button onclick="setAdminTab('site')" data-atab="site" class="atab-btn px-4 py-2 rounded-xl border text-sm font-semibold transition whitespace-nowrap"><i class="fa-solid fa-pen-ruler mr-1.5" aria-hidden="true"></i>Сайт</button>
+      <button onclick="setAdminTab('reviews')" data-atab="reviews" class="atab-btn px-4 py-2 rounded-xl border text-sm font-semibold transition whitespace-nowrap"><i class="fa-solid fa-comments mr-1.5" aria-hidden="true"></i>Відгуки</button>
+    </div>
+
+    <!-- Requests tab -->
+    <div id="atab-requests" class="atab hidden glass p-4 sm:p-6 rounded-2xl">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h3 class="text-lg font-bold text-white">Заявки з сайту</h3>
+        <button onclick="clearDoneRequests()" class="text-xs text-slate-400 hover:text-red-400">Видалити оброблені</button>
+      </div>
+      <div id="adminRequests" class="space-y-3"></div>
+    </div>
+
+    <!-- Products tab -->
+    <div id="atab-products" class="atab hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="glass p-6 rounded-2xl h-fit">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-white" id="formTitle">Додати товар</h3>
+          <button type="button" onclick="resetProductForm()" class="text-xs text-slate-400 hover:text-cyan-400">Новий</button>
+        </div>
+        <form id="productForm" onsubmit="saveProduct(event)" class="space-y-3.5">
+          <input type="hidden" id="prodId">
+          <div>
+            <label for="prodCat" class="block text-xs font-semibold text-slate-400 mb-1">Категорія</label>
+            <select id="prodCat" class="field" onchange="updateCapLabel()">
+              <option value="powerbank">Павербанк</option>
+              <option value="ups">ДБЖ</option>
+            </select>
+          </div>
+          <div>
+            <label for="prodName" class="block text-xs font-semibold text-slate-400 mb-1">Назва</label>
+            <input id="prodName" required class="field">
+          </div>
+          <label class="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-800 bg-slate-950/60 cursor-pointer">
+            <span class="text-sm font-semibold text-white">В наявності</span>
+            <input type="checkbox" id="prodStock" checked class="w-5 h-5 accent-emerald-500">
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="prodPrice" class="block text-xs font-semibold text-slate-400 mb-1">Ціна в наявності</label>
+              <input type="number" min="0" id="prodPrice" required class="field">
+            </div>
+            <div>
+              <label for="prodPre" class="block text-xs font-semibold text-slate-400 mb-1">Під замовлення</label>
+              <input type="number" min="0" id="prodPre" class="field" placeholder="дешевше">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="prodCap" class="block text-xs font-semibold text-slate-400 mb-1" id="capLabel">Ємність (мАг)</label>
+              <input type="number" min="0" id="prodCap" required class="field">
+            </div>
+            <div>
+              <label for="prodPower" class="block text-xs font-semibold text-slate-400 mb-1">Потужність</label>
+              <input id="prodPower" required class="field" placeholder="22.5W">
+            </div>
+          </div>
+          <div>
+            <label for="prodWait" class="block text-xs font-semibold text-slate-400 mb-1">Час очікування</label>
+            <input id="prodWait" class="field" placeholder="≈ 3 тижні">
+          </div>
+          <div>
+            <span class="block text-xs font-semibold text-slate-400 mb-1">Фото товару</span>
+            <input type="hidden" id="prodImg">
+            <div class="flex items-center gap-3">
+              <div class="w-20 h-20 shrink-0 rounded-xl border border-dashed border-slate-700 bg-slate-950/60 overflow-hidden flex items-center justify-center">
+                <img id="prodImgPreview" alt="Попередній перегляд фото" class="hidden w-full h-full object-cover">
+                <i id="prodImgEmpty" class="fa-regular fa-image text-2xl text-slate-600" aria-hidden="true"></i>
+              </div>
+              <div class="flex-1 space-y-2">
+                <label for="prodFile" class="keep-white flex items-center justify-center gap-2 w-full py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-semibold rounded-xl cursor-pointer hover:opacity-90 transition">
+                  <i class="fa-solid fa-camera" aria-hidden="true"></i> Обрати з пристрою
+                </label>
+                <input id="prodFile" type="file" accept="image/*" onchange="loadImageFile(event)" class="sr-only">
+                <button type="button" onclick="setProductImage('')" class="w-full text-xs text-slate-400 hover:text-red-400">Прибрати фото</button>
+              </div>
+            </div>
+            <label for="prodImgUrl" class="block text-xs text-slate-500 mt-2 mb-1">або вставте посилання на фото</label>
+            <input id="prodImgUrl" class="field" placeholder="https://..." oninput="setProductImage(this.value.trim(), true)">
+          </div>
+          <div>
+            <label for="prodDesc" class="block text-xs font-semibold text-slate-400 mb-1">Опис</label>
+            <textarea id="prodDesc" rows="3" class="field"></textarea>
+          </div>
+          <button type="submit" class="keep-white w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl neon-glow hover:opacity-90 transition">Зберегти товар</button>
+        </form>
+      </div>
+
+      <div class="lg:col-span-2 glass p-6 rounded-2xl overflow-x-auto">
+        <h3 class="text-lg font-bold text-white mb-4">Товари в базі</h3>
+        <table class="w-full text-left text-sm text-slate-300 min-w-[560px]">
+          <thead class="text-xs text-slate-400 uppercase border-b border-slate-800">
+            <tr><th class="p-3">Товар</th><th class="p-3">Наявність</th><th class="p-3">Ціна</th><th class="p-3">Під замовл.</th><th class="p-3 text-right">Дії</th></tr>
+          </thead>
+          <tbody id="adminProductTable" class="divide-y divide-slate-800/60"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Site tab -->
+    <form id="atab-site" class="atab hidden glass p-6 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="saveSettings(event)">
+      <div><label for="s-siteName" class="block text-xs font-semibold text-slate-400 mb-1">Назва магазину</label><input id="s-siteName" class="field" required></div>
+      <div><label for="s-tagline" class="block text-xs font-semibold text-slate-400 mb-1">Слоган</label><input id="s-tagline" class="field"></div>
+      <div><label for="s-heroBadge" class="block text-xs font-semibold text-slate-400 mb-1">Бейдж над заголовком</label><input id="s-heroBadge" class="field"></div>
+      <div><label for="s-heroTitle" class="block text-xs font-semibold text-slate-400 mb-1">Заголовок</label><input id="s-heroTitle" class="field"></div>
+      <div><label for="s-heroAccent" class="block text-xs font-semibold text-slate-400 mb-1">Виділена частина заголовка</label><input id="s-heroAccent" class="field"></div>
+      <div><label for="s-telegram" class="block text-xs font-semibold text-slate-400 mb-1">Telegram (без @)</label><input id="s-telegram" class="field" required></div>
+      <div class="md:col-span-2"><label for="s-heroText" class="block text-xs font-semibold text-slate-400 mb-1">Текст під заголовком</label><textarea id="s-heroText" rows="2" class="field"></textarea></div>
+      <div><label for="s-phone" class="block text-xs font-semibold text-slate-400 mb-1">Телефон</label><input id="s-phone" class="field"></div>
+      <div><label for="s-email" class="block text-xs font-semibold text-slate-400 mb-1">Email</label><input id="s-email" type="email" class="field"></div>
+      <div><label for="s-address" class="block text-xs font-semibold text-slate-400 mb-1">Адреса</label><input id="s-address" class="field"></div>
+      <div><label for="s-hours" class="block text-xs font-semibold text-slate-400 mb-1">Графік роботи</label><input id="s-hours" class="field"></div>
+      <div class="md:col-span-2">
+        <button type="submit" class="keep-white px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl neon-glow hover:opacity-90 transition">Зберегти зміни сайту</button>
+      </div>
+    </form>
+
+    <!-- Reviews tab -->
+    <div id="atab-reviews" class="atab hidden glass p-6 rounded-2xl">
+      <h3 class="text-lg font-bold text-white mb-4">Модерація відгуків</h3>
+      <div id="adminReviews" class="space-y-3"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-10 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-500 text-sm">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-bolt text-cyan-400" aria-hidden="true"></i>
+        <span>© 2026 <strong data-s="siteName"></strong>. Всі права захищено.</span>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        <button onclick="showView('reviews')" class="hover:text-cyan-400 transition">Відгуки</button>
+        <button onclick="showView('contacts')" class="hover:text-cyan-400 transition">Контакти</button>
+        <a data-tg target="_blank" rel="noopener" class="hover:text-cyan-400 transition flex items-center gap-1.5">
+          <i class="fa-brands fa-telegram text-sky-400" aria-hidden="true"></i> @<span data-s="telegram"></span>
+        </a>
+        <button onclick="openAdminLogin()" class="text-slate-600 hover:text-slate-400 text-xs flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-lock text-[10px]" aria-hidden="true"></i> Вхід для розробника
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CART DRAWER -->
+  <div id="cartDrawer" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="toggleCart(false)"></div>
+    <div class="absolute inset-y-0 right-0 w-full max-w-md bg-slate-900 border-l border-slate-800 p-6 flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h3 id="cartTitle" class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-cyan-400" aria-hidden="true"></i> Кошик</h3>
+        <button onclick="toggleCart(false)" class="text-slate-400 hover:text-white" aria-label="Закрити кошик"><i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i></button>
+      </div>
+      <div id="cartItems" class="py-4 space-y-3 flex-1 overflow-y-auto"></div>
+      <div class="border-t border-slate-800 pt-4 space-y-3">
+        <p class="text-xs text-emerald-400 flex items-center gap-1.5"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Товари в наявності — відправка за 1–2 дні</p>
+        <div class="flex justify-between text-lg font-bold text-white"><span>Разом:</span><span id="cartTotal" class="text-cyan-400">0 грн</span></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="coName" class="block text-xs font-semibold text-slate-400 mb-1">Ім&apos;я *</label>
+            <input id="coName" type="text" autocomplete="name" class="field" placeholder="Ваше ім'я" oninput="updateCart()">
+          </div>
+          <div>
+            <label for="coPhone" class="block text-xs font-semibold text-slate-400 mb-1">Телефон *</label>
+            <input id="coPhone" type="tel" autocomplete="tel" inputmode="tel" class="field" placeholder="+380" oninput="updateCart()">
+          </div>
+        </div>
+        <a id="checkoutLink" target="_blank" rel="noopener" onclick="return submitCheckout()" class="keep-white block text-center w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl neon-glow hover:opacity-90 transition">
+          <i class="fa-brands fa-telegram mr-1.5" aria-hidden="true"></i> Оформити замовлення
+        </a>
+        <p class="text-[11px] text-slate-500 text-center">Відкриється чат з менеджером у Telegram з готовим текстом замовлення</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREORDER MODAL -->
+  <div id="preorderModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="preTitle">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeModal('preorderModal')"></div>
+    <div class="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+      <button onclick="closeModal('preorderModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white" aria-label="Закрити"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button>
+      <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-lg"><i class="fa-regular fa-clock" aria-hidden="true"></i> Передзамовлення</span>
+      <h3 id="preTitle" class="text-xl font-bold text-white mt-3"></h3>
+      <div class="grid grid-cols-2 gap-3 my-4 text-sm">
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3"><div class="text-xs text-slate-400">Під замовлення</div><div class="font-bold text-amber-400" id="prePrice"></div><div class="text-xs text-slate-500 line-through" id="preStockPrice"></div></div>
+        <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3"><div class="text-xs text-slate-400">Очікування</div><div class="font-bold text-white" id="preWait"></div><div class="text-xs text-emerald-400" id="preSave"></div></div>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label for="preName" class="block text-xs font-semibold text-slate-400 mb-1">Ім&apos;я *</label>
+          <input id="preName" type="text" autocomplete="name" class="field" placeholder="Ваше ім'я" oninput="updatePreorderLink()">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="preQty" class="block text-xs font-semibold text-slate-400 mb-1">Кількість</label>
+            <input id="preQty" type="number" min="1" max="50" value="1" inputmode="numeric" class="field" oninput="updatePreorderLink()">
+          </div>
+          <div>
+            <label for="prePhone" class="block text-xs font-semibold text-slate-400 mb-1">Телефон *</label>
+            <input id="prePhone" type="tel" autocomplete="tel" inputmode="tel" class="field" placeholder="+380" oninput="updatePreorderLink()">
+          </div>
+        </div>
+        <div class="flex justify-between text-sm font-bold text-white bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5"><span>Разом:</span><span id="preTotal" class="text-amber-400"></span></div>
+      </div>
+      <a id="preorderLink" target="_blank" rel="noopener" onclick="return submitPreorder()" class="keep-white mt-5 block text-center w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition">
+        <i class="fa-brands fa-telegram mr-1.5" aria-hidden="true"></i> Оформити передзамовлення
+      </a>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN MODAL -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeModal('loginModal')"></div>
+    <form onsubmit="loginAdmin(event)" class="relative w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center"><i class="fa-solid fa-lock" aria-hidden="true"></i></span>
+        <h3 id="loginTitle" class="text-lg font-bold text-white">Вхід для розробника</h3>
+      </div>
+      <div>
+        <label for="adminPass" class="block text-xs font-semibold text-slate-400 mb-1">Пароль</label>
+        <input id="adminPass" type="password" autocomplete="current-password" required class="field">
+        <p id="loginError" class="hidden text-xs text-red-400 mt-1.5" role="alert">Невірний пароль</p>
+      </div>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('loginModal')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition text-sm">Скасувати</button>
+        <button type="submit" class="keep-white flex-1 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl text-sm">Увійти</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="confirmModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4" role="alertdialog" aria-modal="true" aria-labelledby="confirmText">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
+      <p id="confirmText" class="text-white font-semibold"></p>
+      <div class="flex gap-2">
+        <button onclick="closeModal('confirmModal')" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition text-sm">Скасувати</button>
+        <button id="confirmOk" class="keep-white flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl text-sm">Підтвердити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="keep-white fixed bottom-5 left-1/2 -translate-x-1/2 z-[70] px-5 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm font-semibold shadow-2xl hidden" role="status" aria-live="polite"></div>
+
+  <script>
+    const ADMIN_PASSWORD = 'Volt#Dev2026';
+
+    const DEFAULT_SETTINGS = {
+      siteName: 'ВольтЗапас',
+      tagline: 'Енергія твоєї свободи',
+      heroBadge: 'Офіційна гарантія 12 місяців',
+      heroTitle: 'Незалежність від розеток у',
+      heroAccent: 'будь-яких умовах',
+      heroText: 'Павербанки 10 000–30 000 мАг зі швидкою зарядкою до 100W та ДБЖ для дому й офісу — світло, інтернет і зв’язок навіть під час відключень.',
+      telegram: 'voltzapas',
+      phone: '+380 67 000 00 00',
+      email: 'hello@voltzapas.ua',
+      address: 'Київ, вул. Хрещатик, 1',
+      hours: 'Пн–Сб 09:00–20:00'
+    };
+
+    const DEFAULT_PRODUCTS = [
+      { id: 1, cat: 'powerbank', stock: true, name: 'Volt 10000 FastCharge', price: 790, pre: 720, cap: 10000, power: '22.5W', wait: '≈ 3 тижні', img: './img/pb-10000.png', desc: 'Компактний павербанк з LED-дисплеєм та двома USB-портами.' },
+      { id: 2, cat: 'powerbank', stock: true, name: 'Volt Pro 20000 PD Dual', price: 1350, pre: 1250, cap: 20000, power: '30W', wait: '≈ 3 тижні', img: './img/pb-20000.png', desc: 'Швидка зарядка телефонів і планшетів, USB-C Power Delivery.' },
+      { id: 3, cat: 'powerbank', stock: true, name: 'Volt Max 30000 Monster', price: 1990, pre: 1850, cap: 30000, power: '65W', wait: '≈ 3 тижні', img: './img/pb-30000.png', desc: 'Висока ємність для довгих блекаутів, заряджає ноутбук.' },
+      { id: 4, cat: 'ups', stock: true, name: 'Volt UPS Home 600VA', price: 2890, pre: 2690, cap: 600, power: '360W', wait: '≈ 3 тижні', img: './img/ups-home.png', desc: 'ДБЖ для роутера, ONT та комп’ютера. LCD-екран, 2 розетки.' },
+      { id: 5, cat: 'ups', stock: true, name: 'Volt UPS Pro 1500VA Sine', price: 7490, pre: 6990, cap: 1500, power: '1000W', wait: '≈ 3 тижні', img: './img/ups-pro.png', desc: 'Чиста синусоїда, підходить для котла та насосів. Підключення АКБ.' }
+    ];
+
+    const DEFAULT_REVIEWS = [
+      { id: 1, name: 'Олександр, Київ', rating: 5, text: 'Взяв Volt Max 30000 на відключення — ноутбук і роутер працюють майже добу. Дуже задоволений.', date: '2026-10-12' },
+      { id: 2, name: 'Ірина, Львів', rating: 5, text: 'Оформила передзамовлення на ДБЖ, приїхав рівно через 3 тижні. Котел тепер не вимикається.', date: '2026-10-28' },
+      { id: 3, name: 'Максим, Дніпро', rating: 4, text: 'Хороший павербанк на 20 000, заряджає швидко. Трохи важкуватий, але це очікувано.', date: '2026-11-02' },
+      { id: 4, name: 'Наталія, Одеса', rating: 5, text: 'Менеджер у Telegram допоміг підібрати модель під мої потреби. Рекомендую!', date: '2026-11-06' }
+    ];
+
+    const store = {
+      get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
+      set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } }
+    };
+
+    let settings = { ...DEFAULT_SETTINGS, ...store.get('volt_settings', {}) };
+    if (!settings.telegram || settings.telegram === 'ret4r_official') settings.telegram = 'voltzapas';
+    let products = store.get('volt_products_v2', DEFAULT_PRODUCTS).map(p => ({ ...p, stock: p.stock !== false }));
+    let requests = store.get('volt_requests', []);
+    let lastContactText = '';
+    let reviews = store.get('volt_reviews', DEFAULT_REVIEWS);
+    let cart = store.get('volt_cart_v2', []);
+    let currentCat = 'powerbank';
+    let currentFilter = 'all';
+    let currentView = 'home';
+    let isAdmin = false;
+    let preorderProduct = null;
+
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const money = n => Number(n || 0).toLocaleString('uk-UA') + ' грн';
+    const unitOf = cat => cat === 'ups' ? 'ВА' : 'мАг';
+    const catLabel = cat => cat === 'ups' ? 'ДБЖ' : 'Павербанк';
+    const tgUrl = text => `https://t.me/${encodeURIComponent(settings.telegram)}${text ? '?text=' + encodeURIComponent(text) : ''}`;
+
+    const ACTIVE = 'bg-cyan-500 border-cyan-400 text-white keep-white';
+    const IDLE = 'border-slate-800 bg-slate-900 text-slate-400 hover:text-cyan-400';
+
+    function styleGroup(selector, attr, value) {
+      document.querySelectorAll(selector).forEach(btn => {
+        const active = btn.dataset[attr] === value;
+        btn.classList.remove(...ACTIVE.split(' '), ...IDLE.split(' '));
+        btn.classList.add(...(active ? ACTIVE : IDLE).split(' '));
+        btn.setAttribute('aria-pressed', active);
+      });
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(toast.t);
+      toast.t = setTimeout(() => el.classList.add('hidden'), 2600);
+    }
+
+    function openModal(id) { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
+    function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+
+    function confirmAction(text, onOk) {
+      document.getElementById('confirmText').textContent = text;
+      document.getElementById('confirmOk').onclick = () => { closeModal('confirmModal'); onOk(); };
+      openModal('confirmModal');
+    }
+
+    /* Settings */
+    function applySettings() {
+      document.querySelectorAll('[data-s]').forEach(el => el.textContent = settings[el.dataset.s] || '');
+      document.querySelectorAll('[data-tg]').forEach(el => el.href = tgUrl());
+      document.getElementById('phoneLink').href = 'tel:' + settings.phone.replace(/[^\d+]/g, '');
+      document.getElementById('emailLink').href = 'mailto:' + settings.email;
+      document.title = `${settings.siteName} — Павербанки та ДБЖ`;
+    }
+
+    function fillSettingsForm() {
+      Object.keys(DEFAULT_SETTINGS).forEach(k => { const el = document.getElementById('s-' + k); if (el) el.value = settings[k]; });
+    }
+
+    function saveSettings(e) {
+      e.preventDefault();
+      Object.keys(DEFAULT_SETTINGS).forEach(k => { const el = document.getElementById('s-' + k); if (el) settings[k] = el.value.trim(); });
+      settings.telegram = settings.telegram.replace(/^@/, '');
+      store.set('volt_settings', settings);
+      applySettings();
+      updateCart();
+      toast('Зміни сайту збережено');
+    }
+
+    /* Views */
+    function showView(view, cat) {
+      if (view === 'admin' && !isAdmin) return openAdminLogin();
+      currentView = view;
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('hidden', v.id !== 'view-' + view));
+      if (view === 'home' && cat) {
+        setCategory(cat);
+        requestAnimationFrame(() => document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' }));
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (view === 'reviews') renderReviews();
+      updateNav();
+    }
+
+    function updateNav() {
+      const key = currentView === 'home' ? currentCat : currentView;
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const active = btn.dataset.nav === key;
+        btn.classList.toggle('bg-cyan-500/15', active);
+        btn.classList.toggle('text-cyan-400', active);
+        btn.classList.toggle('text-slate-300', !active);
+        btn.classList.toggle('hover:bg-slate-800', !active);
+        if (active) btn.setAttribute('aria-current', 'page'); else btn.removeAttribute('aria-current');
+      });
+    }
+
+    /* Catalog */
+    function setCategory(cat) {
+      currentCat = cat;
+      currentFilter = 'all';
+      styleGroup('.cat-btn', 'cat', cat);
+      const isPb = cat === 'powerbank';
+      document.getElementById('capFilters').classList.toggle('hidden', !isPb);
+      document.getElementById('capDivider').classList.toggle('sm:block', isPb);
+      document.getElementById('catalogTitle').textContent = isPb ? 'Павербанки' : 'Джерела безперебійного живлення (ДБЖ)';
+      document.getElementById('catalogSubtitle').textContent = isPb ? 'Знайдіть ідеальну ємність під ваші потреби' : 'Захист техніки та живлення роутера, котла й комп’ютера';
+      setFilter('all');
+      updateNav();
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      styleGroup('.filter-btn', 'filter', filter);
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const list = products.filter(p => {
+        if (p.cat !== currentCat) return false;
+        if (currentCat === 'powerbank' && currentFilter !== 'all') {
+          if (currentFilter === '30000' ? p.cap < 30000 : p.cap != currentFilter) return false;
+        }
+        return p.name.toLowerCase().includes(q);
+      });
+      document.getElementById('emptyState').classList.toggle('hidden', list.length > 0);
+      document.getElementById('productGrid').innerHTML = list.map(p => {
+        const pre = preOf(p);
+        const save = p.price - pre;
+        const badge = p.stock
+          ? '<span class="keep-white absolute top-2 left-2 bg-emerald-500 text-white text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> В наявності</span>'
+          : '<span class="keep-white absolute top-2 left-2 bg-amber-500 text-white text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fa-regular fa-clock" aria-hidden="true"></i> Під замовлення</span>';
+        const buttons = p.stock
+          ? `<button onclick="addToCart(${p.id})" class="keep-white w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 text-white font-semibold rounded-xl transition text-sm"><i class="fa-solid fa-cart-plus mr-1.5" aria-hidden="true"></i>Купити зараз</button>
+             <button onclick="openPreorder(${p.id})" class="w-full py-2.5 border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 font-semibold rounded-xl transition text-sm">Під замовлення за ${money(pre)}</button>`
+          : `<button onclick="openPreorder(${p.id})" class="keep-white w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-white font-semibold rounded-xl transition text-sm"><i class="fa-regular fa-clock mr-1.5" aria-hidden="true"></i>Передзамовити</button>`;
+        return `
+        <article class="glass rounded-2xl p-4 flex flex-col hover:border-cyan-500/50 transition group">
+          <div class="h-48 rounded-xl overflow-hidden bg-slate-900 mb-4 relative">
+            <img src="${esc(p.img)}" alt="${esc(p.name)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            ${badge}
+            <span class="absolute top-2 right-2 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-cyan-400 border border-slate-700">${esc(p.power)}</span>
+          </div>
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-cyan-400">${catLabel(p.cat)}</span>
+          <h3 class="font-bold text-white text-base mb-1">${esc(p.name)}</h3>
+          <p class="text-slate-400 text-xs mb-3 line-clamp-2">${esc(p.desc)}</p>
+          <div class="mt-auto">
+            <div class="flex items-end justify-between gap-2 mb-2">
+              <div>
+                <span class="block text-[11px] text-slate-400">${p.stock ? 'Ціна в наявності' : 'Ціна під замовлення'}</span>
+                <span class="text-xl font-extrabold text-white">${money(p.stock ? p.price : pre)}</span>
+              </div>
+              <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded-md border border-slate-800 shrink-0">${Number(p.cap).toLocaleString('uk-UA')} ${unitOf(p.cat)}</span>
+            </div>
+            <div class="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 mb-3 text-xs flex items-center justify-between gap-2">
+              <span class="text-slate-300"><i class="fa-regular fa-clock text-amber-400 mr-1" aria-hidden="true"></i>Під замовлення ${esc(p.wait || '≈ 3 тижні')}</span>
+              ${p.stock && save > 0 ? `<b class="text-emerald-400 shrink-0">−${money(save)}</b>` : ''}
+            </div>
+            <div class="flex flex-col gap-2">${buttons}</div>
+          </div>
+        </article>`;
+      }).join('');
+    }
+
+    const preOf = p => (p.pre > 0 ? p.pre : p.price);
+
+    /* Requests */
+    const REQ_TYPES = { contact: ['Повідомлення', 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30'], preorder: ['Передзамовлення', 'text-amber-400 bg-amber-500/10 border-amber-500/30'], order: ['Замовлення', 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'] };
+
+    function addRequest(type, data) {
+      requests.push({ id: Date.now(), type, done: false, date: new Date().toISOString(), ...data });
+      store.set('volt_requests', requests);
+      updateReqBadge();
+    }
+
+    function updateReqBadge() {
+      const n = requests.filter(r => !r.done).length;
+      const b = document.getElementById('reqBadge');
+      b.textContent = n;
+      b.classList.toggle('hidden', n === 0);
+    }
+
+    function renderAdminRequests() {
+      document.getElementById('adminRequests').innerHTML = [...requests].reverse().map(r => {
+        const [label, cls] = REQ_TYPES[r.type] || REQ_TYPES.contact;
+        const tel = String(r.phone || '').replace(/[^\d+]/g, '');
+        return `
+        <article class="rounded-xl border ${r.done ? 'border-slate-800 opacity-60' : 'border-slate-700'} bg-slate-950/60 p-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md border ${cls}">${label}</span>
+            <time class="text-xs text-slate-500">${new Date(r.date).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' })}</time>
+          </div>
+          <p class="font-bold text-white text-sm">${esc(r.name || 'Без імені')}${r.phone ? ` · <span class="text-slate-300 font-normal">${esc(r.phone)}</span>` : ''}</p>
+          <p class="text-slate-300 text-sm mt-1 whitespace-pre-line break-words">${esc(r.text)}</p>
+          <div class="flex flex-wrap gap-2 mt-3">
+            ${tel ? `<a href="tel:${esc(tel)}" class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-semibold"><i class="fa-solid fa-phone mr-1" aria-hidden="true"></i>Подзвонити</a>` : ''}
+            <button onclick="toggleRequest(${r.id})" class="px-3 py-2 rounded-lg ${r.done ? 'bg-slate-800 text-slate-300' : 'bg-emerald-500/15 text-emerald-400'} text-xs font-semibold">${r.done ? 'Повернути в нові' : 'Позначити обробленою'}</button>
+            <button onclick="deleteRequest(${r.id})" class="px-3 py-2 rounded-lg text-red-400 hover:bg-slate-800 text-xs" aria-label="Видалити заявку"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+          </div>
+        </article>`;
+      }).join('') || '<p class="text-slate-400 text-sm py-6 text-center">Заявок поки немає</p>';
+    }
+
+    function toggleRequest(id) {
+      const r = requests.find(x => x.id === id);
+      if (r) r.done = !r.done;
+      store.set('volt_requests', requests);
+      renderAdminRequests(); updateReqBadge();
+    }
+
+    function deleteRequest(id) {
+      confirmAction('Видалити цю заявку?', () => {
+        requests = requests.filter(r => r.id !== id);
+        store.set('volt_requests', requests);
+        renderAdminRequests(); updateReqBadge();
+      });
+    }
+
+    function clearDoneRequests() {
+      requests = requests.filter(r => !r.done);
+      store.set('volt_requests', requests);
+      renderAdminRequests(); updateReqBadge();
+      toast('Оброблені заявки видалено');
+    }
+
+    /* Preorder */
+    function openPreorder(id) {
+      preorderProduct = products.find(p => p.id === id);
+      if (!preorderProduct) return;
+      document.getElementById('preTitle').textContent = preorderProduct.name;
+      const pre = preOf(preorderProduct), save = preorderProduct.price - pre;
+      document.getElementById('prePrice').textContent = money(pre);
+      document.getElementById('preStockPrice').textContent = save > 0 ? money(preorderProduct.price) : '';
+      document.getElementById('preSave').textContent = save > 0 ? `Економія ${money(save)}` : '';
+      document.getElementById('preWait').textContent = preorderProduct.wait || '≈ 3 тижні';
+      document.getElementById('preQty').value = 1;
+      updatePreorderLink();
+      openModal('preorderModal');
+    }
+
+    const validPhone = v => v.replace(/\D/g, '').length >= 10;
+
+    function updatePreorderLink() {
+      if (!preorderProduct) return;
+      const qty = Math.min(50, Math.max(1, parseInt(document.getElementById('preQty').value, 10) || 1));
+      const name = document.getElementById('preName').value.trim();
+      const phone = document.getElementById('prePhone').value.trim();
+      const price = preOf(preorderProduct);
+      document.getElementById('preTotal').textContent = money(price * qty);
+      const msg = `Вітаю! Хочу оформити передзамовлення:\n• ${preorderProduct.name} — ${qty} шт. × ${money(price)}\nСума: ${money(price * qty)}\nОчікування: ${preorderProduct.wait || '≈ 3 тижні'}\n\nІм'я: ${name}\nТелефон: ${phone}`;
+      document.getElementById('preorderLink').href = tgUrl(msg);
+      return { msg, name, phone };
+    }
+
+    function submitPreorder() {
+      const res = updatePreorderLink();
+      if (!res) return false;
+      if (!res.name) { toast("Вкажіть ім'я"); document.getElementById('preName').focus(); return false; }
+      if (!validPhone(res.phone)) { toast('Вкажіть коректний номер телефону'); document.getElementById('prePhone').focus(); return false; }
+      addRequest('preorder', { name: res.name, phone: res.phone, text: res.msg });
+      closeModal('preorderModal');
+      toast(`Заявку збережено, відкриваємо чат @${settings.telegram}`);
+      return true;
+    }
+
+    /* Cart */
+    function addToCart(id) {
+      const item = cart.find(c => c.id === id);
+      if (item) item.qty = Math.min(50, item.qty + 1); else cart.push({ id, qty: 1 });
+      updateCart();
+      toggleCart(true);
+    }
+
+    function changeQty(id, delta) {
+      const item = cart.find(c => c.id === id);
+      if (item) item.qty = Math.min(50, item.qty + delta);
+      cart = cart.filter(c => c.qty > 0);
+      updateCart();
+    }
+
+    function cartLines() {
+      return cart.map(c => ({ ...c, p: products.find(p => p.id === c.id) })).filter(c => c.p);
+    }
+
+    function updateCart() {
+      cart = cart.filter(c => products.some(p => p.id === c.id));
+      store.set('volt_cart_v2', cart);
+      const lines = cartLines();
+      const qty = lines.reduce((s, l) => s + l.qty, 0);
+      const total = lines.reduce((s, l) => s + l.p.price * l.qty, 0);
+      const badge = document.getElementById('cartBadge');
+      badge.textContent = qty;
+      badge.classList.toggle('hidden', qty === 0);
+      document.getElementById('cartItems').innerHTML = lines.length ? lines.map(l => `
+        <div class="flex items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+          <div class="flex items-center gap-3 min-w-0">
+            <img src="${esc(l.p.img)}" alt="" class="w-12 h-12 object-cover rounded-lg shrink-0">
+            <div class="min-w-0">
+              <h4 class="text-sm font-bold text-white truncate">${esc(l.p.name)}</h4>
+              <span class="text-xs text-cyan-400">${money(l.p.price)}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="changeQty(${l.id}, -1)" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300" aria-label="Зменшити кількість">-</button>
+            <span class="text-sm font-bold w-5 text-center">${l.qty}</span>
+            <button onclick="changeQty(${l.id}, 1)" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300" aria-label="Збільшити кількість">+</button>
+          </div>
+        </div>`).join('') : '<p class="text-center text-slate-400 py-10 text-sm">Кошик порожній</p>';
+      document.getElementById('cartTotal').textContent = money(total);
+      document.getElementById('checkoutLink').href = tgUrl(checkoutMessage(lines, total));
+    }
+
+    function checkoutMessage(lines, total) {
+      const name = document.getElementById('coName').value.trim();
+      const phone = document.getElementById('coPhone').value.trim();
+      const items = lines.map(l => `• ${l.p.name} — ${l.qty} шт. × ${money(l.p.price)}`).join('\n');
+      return `Вітаю! Хочу оформити замовлення (в наявності):\n${items}\nСума: ${money(total)}\n\nІм'я: ${name}\nТелефон: ${phone}`;
+    }
+
+    function submitCheckout() {
+      const lines = cartLines();
+      if (!lines.length) { toast('Кошик порожній'); return false; }
+      const name = document.getElementById('coName').value.trim();
+      const phone = document.getElementById('coPhone').value.trim();
+      if (!name) { toast("Вкажіть ім'я"); document.getElementById('coName').focus(); return false; }
+      if (!validPhone(phone)) { toast('Вкажіть коректний номер телефону'); document.getElementById('coPhone').focus(); return false; }
+      const total = lines.reduce((s, l) => s + l.p.price * l.qty, 0);
+      const msg = checkoutMessage(lines, total);
+      document.getElementById('checkoutLink').href = tgUrl(msg);
+      addRequest('order', { name, phone, text: msg });
+      toast(`Відкриваємо чат @${settings.telegram}`);
+      return true;
+    }
+
+    function toggleCart(open) { document.getElementById('cartDrawer').classList.toggle('hidden', !open); }
+
+    /* Reviews */
+    const stars = n => Array.from({ length: 5 }, (_, i) => `<i class="fa-${i < n ? 'solid' : 'regular'} fa-star" aria-hidden="true"></i>`).join('');
+
+    function renderReviews() {
+      const avg = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
+      document.getElementById('avgRating').textContent = avg.toFixed(1);
+      document.getElementById('avgStars').innerHTML = stars(Math.round(avg)) + `<span class="sr-only">${avg.toFixed(1)} з 5</span>`;
+      document.getElementById('reviewCount').textContent = `${reviews.length} відгуків`;
+      document.getElementById('reviewList').innerHTML = [...reviews].reverse().map(r => `
+        <article class="glass rounded-2xl p-5">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="keep-white w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-white font-bold flex items-center justify-center shrink-0">${esc(r.name.charAt(0).toUpperCase())}</span>
+              <span class="font-bold text-white text-sm truncate">${esc(r.name)}</span>
+            </div>
+            <span class="text-amber-400 text-xs shrink-0">${stars(r.rating)}<span class="sr-only">${r.rating} з 5</span></span>
+          </div>
+          <p class="text-slate-300 text-sm leading-relaxed">${esc(r.text)}</p>
+          <time class="block text-xs text-slate-500 mt-3">${new Date(r.date).toLocaleDateString('uk-UA')}</time>
+        </article>`).join('');
+    }
+
+    function addReview(e) {
+      e.preventDefault();
+      const name = document.getElementById('revName').value.trim();
+      const text = document.getElementById('revText').value.trim();
+      const rating = Math.min(5, Math.max(1, parseInt(document.getElementById('revRating').value, 10)));
+      if (!name || !text) return;
+      reviews.push({ id: Date.now(), name, text, rating, date: new Date().toISOString().slice(0, 10) });
+      store.set('volt_reviews', reviews);
+      e.target.reset();
+      renderReviews();
+      toast('Дякуємо за відгук!');
+    }
+
+    /* Contacts */
+    function sendContact(e) {
+      e.preventDefault();
+      const name = document.getElementById('ctName').value.trim();
+      const phone = document.getElementById('ctPhone').value.trim();
+      const text = document.getElementById('ctMsg').value.trim();
+      if (!name || !phone || !text) return;
+      lastContactText = `Вітаю! Мене звати ${name}, телефон ${phone}.\n${text}`;
+      addRequest('contact', { name, phone, text });
+      document.getElementById('ctTgLink').href = tgUrl(lastContactText);
+      e.target.reset();
+      document.getElementById('contactForm').classList.add('hidden');
+      document.getElementById('contactDone').classList.remove('hidden');
+      toast('Заявку прийнято');
+    }
+
+    function resetContact() {
+      document.getElementById('contactDone').classList.add('hidden');
+      document.getElementById('contactForm').classList.remove('hidden');
+    }
+
+    async function copyContactText() {
+      try { await navigator.clipboard.writeText(lastContactText); toast('Текст скопійовано'); }
+      catch { toast('Не вдалося скопіювати'); }
+    }
+
+    /* Developer cabinet */
+    function openAdminLogin() {
+      if (isAdmin) return showView('admin');
+      document.getElementById('adminPass').value = '';
+      document.getElementById('loginError').classList.add('hidden');
+      openModal('loginModal');
+      setTimeout(() => document.getElementById('adminPass').focus(), 50);
+    }
+
+    function loginAdmin(e) {
+      e.preventDefault();
+      if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
+        isAdmin = true;
+        closeModal('loginModal');
+        fillSettingsForm();
+        setAdminTab('requests');
+        showView('admin');
+        toast('Вітаємо в кабінеті розробника');
+      } else {
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdmin = false;
+      showView('home');
+      toast('Ви вийшли з кабінету');
+    }
+
+    function setAdminTab(tab) {
+      styleGroup('.atab-btn', 'atab', tab);
+      document.querySelectorAll('.atab').forEach(t => t.classList.toggle('hidden', t.id !== 'atab-' + tab));
+      if (tab === 'products') renderAdminTable();
+      if (tab === 'requests') renderAdminRequests();
+      if (tab === 'reviews') renderAdminReviews();
+      if (tab === 'site') fillSettingsForm();
+    }
+
+    function updateCapLabel() {
+      document.getElementById('capLabel').textContent = document.getElementById('prodCat').value === 'ups' ? 'Потужність (ВА)' : 'Ємність (мАг)';
+    }
+
+    function setProductImage(src, fromUrl) {
+      document.getElementById('prodImg').value = src;
+      if (!fromUrl) document.getElementById('prodImgUrl').value = src.startsWith('data:') ? '' : src;
+      const img = document.getElementById('prodImgPreview');
+      img.classList.toggle('hidden', !src);
+      document.getElementById('prodImgEmpty').classList.toggle('hidden', !!src);
+      if (src) img.src = src; else img.removeAttribute('src');
+    }
+
+    function compressImage(file, maxSide = 900) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('bad image')); };
+        img.src = url;
+      });
+    }
+
+    async function loadImageFile(e) {
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      if (!file.type.startsWith('image/')) return toast('Оберіть файл зображення');
+      try {
+        setProductImage(await compressImage(file));
+        toast('Фото додано');
+      } catch {
+        toast('Не вдалося відкрити фото');
+      }
+    }
+
+    function resetProductForm() {
+      document.getElementById('productForm').reset();
+      document.getElementById('prodId').value = '';
+      document.getElementById('prodStock').checked = true;
+      setProductImage('');
+      document.getElementById('formTitle').textContent = 'Додати товар';
+      updateCapLabel();
+    }
+
+    function editProduct(id) {
+      const p = products.find(x => x.id === id);
+      if (!p) return;
+      const set = (k, v) => document.getElementById(k).value = v ?? '';
+      set('prodId', p.id); set('prodCat', p.cat); set('prodName', p.name); set('prodPrice', p.price);
+      set('prodPre', p.pre); set('prodCap', p.cap); set('prodPower', p.power); set('prodWait', p.wait);
+      set('prodDesc', p.desc);
+      setProductImage(p.img || '');
+      document.getElementById('prodStock').checked = p.stock !== false;
+      document.getElementById('formTitle').textContent = 'Редагувати товар';
+      updateCapLabel();
+      document.getElementById('productForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const val = k => document.getElementById(k).value.trim();
+      const id = val('prodId');
+      if (!val('prodImg')) return toast('Додайте фото товару');
+      const prod = {
+        id: id ? Number(id) : Date.now(),
+        cat: val('prodCat'),
+        stock: document.getElementById('prodStock').checked,
+        name: val('prodName'),
+        price: Math.max(0, Number(val('prodPrice')) || 0),
+        pre: Math.max(0, Number(val('prodPre')) || 0),
+        cap: Math.max(0, parseInt(val('prodCap'), 10) || 0),
+        power: val('prodPower'),
+        wait: val('prodWait') || '≈ 3 тижні',
+        img: val('prodImg'),
+        desc: val('prodDesc')
+      };
+      const backup = [...products];
+      const idx = products.findIndex(p => p.id === prod.id);
+      if (idx >= 0) products[idx] = prod; else products.push(prod);
+      if (!store.set('volt_products_v2', products)) {
+        products = backup;
+        return toast('Пам’ять браузера заповнена — оберіть менше фото');
+      }
+      resetProductForm();
+      renderAdminTable();
+      renderProducts();
+      updateCart();
+      toast('Товар збережено');
+    }
+
+    function deleteProduct(id) {
+      const p = products.find(x => x.id === id);
+      confirmAction(`Видалити «${p ? p.name : 'товар'}»?`, () => {
+        products = products.filter(x => x.id !== id);
+        store.set('volt_products_v2', products);
+        renderAdminTable(); renderProducts(); updateCart();
+        toast('Товар видалено');
+      });
+    }
+
+    function renderAdminTable() {
+      document.getElementById('adminProductTable').innerHTML = products.map(p => `
+        <tr>
+          <td class="p-3"><div class="flex items-center gap-3"><img src="${esc(p.img)}" alt="" class="w-10 h-10 rounded-lg object-cover"><span class="font-semibold text-white">${esc(p.name)}</span></div></td>
+          <td class="p-3 whitespace-nowrap">${p.stock ? '<span class="text-emerald-400 font-semibold">В наявності</span>' : '<span class="text-amber-400 font-semibold">Під замовл.</span>'}<span class="block text-xs text-slate-500">${catLabel(p.cat)}</span></td>
+          <td class="p-3 text-cyan-400 font-bold whitespace-nowrap">${money(p.price)}</td>
+          <td class="p-3 text-amber-400 whitespace-nowrap">${money(preOf(p))}<span class="block text-xs text-slate-400">${esc(p.wait)}</span></td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <button onclick="editProduct(${p.id})" class="w-8 h-8 rounded-lg hover:bg-slate-800 text-cyan-400" aria-label="Редагувати ${esc(p.name)}"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+            <button onclick="deleteProduct(${p.id})" class="w-8 h-8 rounded-lg hover:bg-slate-800 text-red-400" aria-label="Видалити ${esc(p.name)}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+          </td>
+        </tr>`).join('') || '<tr><td colspan="5" class="p-6 text-center text-slate-400">Товарів немає</td></tr>';
+    }
+
+    function renderAdminReviews() {
+      document.getElementById('adminReviews').innerHTML = [...reviews].reverse().map(r => `
+        <div class="flex items-start justify-between gap-4 bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 text-sm"><b class="text-white">${esc(r.name)}</b><span class="text-amber-400 text-xs">${stars(r.rating)}</span></div>
+            <p class="text-slate-400 text-sm mt-1">${esc(r.text)}</p>
+          </div>
+          <button onclick="deleteReview(${r.id})" class="w-8 h-8 shrink-0 rounded-lg hover:bg-slate-800 text-red-400" aria-label="Видалити відгук"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+        </div>`).join('') || '<p class="text-slate-400 text-sm">Відгуків немає</p>';
+    }
+
+    function deleteReview(id) {
+      confirmAction('Видалити цей відгук?', () => {
+        reviews = reviews.filter(r => r.id !== id);
+        store.set('volt_reviews', reviews);
+        renderAdminReviews(); renderReviews();
+        toast('Відгук видалено');
+      });
+    }
+
+    function resetAll() {
+      confirmAction('Повернути всі товари, тексти та відгуки до початкових?', () => {
+        settings = { ...DEFAULT_SETTINGS }; products = [...DEFAULT_PRODUCTS]; reviews = [...DEFAULT_REVIEWS];
+        store.set('volt_settings', settings); store.set('volt_products_v2', products); store.set('volt_reviews', reviews);
+        applySettings(); fillSettingsForm(); renderProducts(); renderAdminTable(); renderAdminReviews(); updateCart();
+        toast('Дані скинуто');
+      });
+    }
+
+    /* Theme */
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      root.classList.toggle('dark', theme === 'dark');
+      root.classList.toggle('light', theme === 'light');
+      document.getElementById('themeIcon').className = `fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'} text-base sm:text-lg`;
+      store.set('volt_theme', theme);
+    }
+    function toggleTheme() { applyTheme(document.documentElement.classList.contains('light') ? 'dark' : 'light'); }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { ['preorderModal', 'loginModal', 'confirmModal'].forEach(closeModal); toggleCart(false); }
+    });
+
+    applyTheme(store.get('volt_theme', 'dark'));
+    applySettings();
+    setCategory('powerbank');
+    updateCart();
+    renderReviews();
+    updateReqBadge();
+  </script>
+</body>
+</html>
