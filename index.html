@@ -18,7 +18,7 @@
     .no-scrollbar { scrollbar-width: none; }
     .field { width: 100%; padding: .55rem .875rem; border-radius: .75rem; font-size: .875rem; background: #0f172a; border: 1px solid #334155; color: inherit; }
     .field:focus { outline: none; border-color: #06b6d4; }
-    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
     /* Light theme */
     html.light body { background: #f1f5f9; color: #0f172a; }
@@ -496,9 +496,9 @@
         </div>
         <div class="flex justify-between text-sm font-bold text-white bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5"><span>Разом:</span><span id="preTotal" class="text-amber-400"></span></div>
       </div>
-      <a id="preorderLink" target="_blank" rel="noopener" onclick="return submitPreorder()" class="keep-white mt-5 block text-center w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition">
+      <button id="preorderLink" type="button" onclick="submitPreorder()" class="keep-white mt-5 block text-center w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:opacity-90 transition">
         <i class="fa-brands fa-telegram mr-1.5" aria-hidden="true"></i> Оформити передзамовлення
-      </a>
+      </button>
     </div>
   </div>
 
@@ -877,7 +877,7 @@
           try { items = JSON.parse(items); } catch { items = []; }
         }
         const itemText = Array.isArray(items)
-          ? items.map(item => `${esc(item.name || item.title || 'Товар')} × ${Number(item.qty || item.quantity || 1)}`).join(', ')
+          ? items.map(item => `${esc(item.name || item.title || 'Товар')} × ${Number(item.qty || item.quantity || 1)}${item.preorder || item.type === 'preorder' ? ' (передзамовлення)' : ''}`).join(', ')
           : esc(String(items || ''));
         const date = order.created_at || order.createdAt;
         const status = order.status || 'new';
@@ -997,18 +997,35 @@
       const price = preOf(preorderProduct);
       document.getElementById('preTotal').textContent = money(price * qty);
       const msg = `Вітаю! Хочу оформити передзамовлення:\n• ${preorderProduct.name} — ${qty} шт. × ${money(price)}\nСума: ${money(price * qty)}\nОчікування: ${preorderProduct.wait || '≈ 3 тижні'}\n\nІм'я: ${name}\nТелефон: ${phone}`;
-      document.getElementById('preorderLink').href = tgUrl(msg);
       return { msg, name, phone };
     }
 
-    function submitPreorder() {
+    async function submitPreorder() {
       const res = updatePreorderLink();
       if (!res) return false;
       if (!res.name) { toast("Вкажіть ім'я"); document.getElementById('preName').focus(); return false; }
       if (!validPhone(res.phone)) { toast('Вкажіть коректний номер телефону'); document.getElementById('prePhone').focus(); return false; }
-      addRequest('preorder', { name: res.name, phone: res.phone, text: res.msg });
-      closeModal('preorderModal');
-      toast(`Заявку збережено, відкриваємо чат @${settings.telegram}`);
+      const qty = Math.min(50, Math.max(1, parseInt(document.getElementById('preQty').value, 10) || 1));
+      const price = preOf(preorderProduct);
+      const chat = window.open('about:blank', '_blank');
+      try {
+        await apiRequest('/api/orders', {
+          method: 'POST',
+          body: JSON.stringify({
+            customer_name: res.name,
+            phone: res.phone,
+            delivery_info: `Передзамовлення; очікування: ${preorderProduct.wait || '≈ 3 тижні'}`,
+            items: [{ product_id: preorderProduct.id, name: preorderProduct.name, qty, price, preorder: true }],
+            total_price: price * qty
+          })
+        });
+        closeModal('preorderModal');
+        if (chat) chat.location.href = tgUrl(res.msg);
+        toast(chat ? `Передзамовлення збережено. Відкриваємо чат @${settings.telegram}` : 'Передзамовлення збережено');
+      } catch (error) {
+        if (chat) chat.close();
+        toast(`Не вдалося зберегти передзамовлення: ${error.message}`);
+      }
       return true;
     }
 
