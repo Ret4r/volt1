@@ -5,10 +5,25 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'POST') {
-    const { customer_name, phone, delivery_info, items, total_price } = req.body;
+    const { customer_name, phone, delivery_info, delivery_city, delivery_branch, comment, items, total_price } = req.body;
+    if (comment != null && typeof comment !== 'string') {
+      return res.status(400).json({ error: 'Коментар має бути текстом' });
+    }
+    const orderComment = typeof comment === 'string' ? comment.trim() : '';
+    if (orderComment.length > 500) {
+      return res.status(400).json({ error: 'Коментар має містити не більше 500 символів' });
+    }
+    const city = typeof delivery_city === 'string' ? delivery_city.trim() : '';
+    const branch = typeof delivery_branch === 'string' ? delivery_branch.trim() : '';
+    const orderInfo = [
+      city ? `Місто: ${city}` : '',
+      branch ? `Відділення: ${branch}` : '',
+      !city && !branch && typeof delivery_info === 'string' ? delivery_info.trim() : '',
+      orderComment ? `Коментар: ${orderComment}` : ''
+    ].filter(Boolean).join('\n');
     const [order] = await sql`
       INSERT INTO orders (customer_name, phone, delivery_info, items, total_price)
-      VALUES (${customer_name}, ${phone}, ${delivery_info}, ${JSON.stringify(items)}, ${total_price})
+      VALUES (${customer_name}, ${phone}, ${orderInfo}, ${JSON.stringify(items)}, ${total_price})
       RETURNING *
     `;
     return res.status(201).json(order);
