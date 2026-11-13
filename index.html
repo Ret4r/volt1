@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="uk" class="dark">
-<head><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<head><link rel="icon" href="/logo.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ВольтЗапас — Павербанки та ДБЖ</title>
@@ -19,6 +19,9 @@
     .field { width: 100%; padding: .55rem .875rem; border-radius: .75rem; font-size: .875rem; background: #0f172a; border: 1px solid #334155; color: inherit; }
     .field:focus { outline: none; border-color: #06b6d4; }
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    #cropStage { position: relative; width: 100%; max-height: 55vh; overflow: hidden; background: #020617; touch-action: none; cursor: grab; }
+    #cropStage:active { cursor: grabbing; }
+    #cropImage { position: absolute; max-width: none; max-height: none; user-select: none; pointer-events: none; }
 
     /* Light theme */
     html.light body { background: #f1f5f9; color: #0f172a; }
@@ -53,8 +56,8 @@
   <header class="sticky top-0 z-40 glass w-full">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
       <a href="#" onclick="showView('home'); return false;" class="flex items-center gap-2 sm:gap-3 group min-w-0">
-        <div class="keep-white w-9 h-9 sm:w-11 sm:h-11 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center neon-glow group-hover:scale-105 transition">
-          <i class="fa-solid fa-bolt text-base sm:text-xl text-white" aria-hidden="true"></i>
+        <div class="w-9 h-9 sm:w-11 sm:h-11 shrink-0 rounded-xl group-hover:scale-105 transition">
+          <img src="/logo.png" alt="" class="w-full h-full object-contain">
         </div>
         <div class="min-w-0">
           <span class="block truncate text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent" data-s="siteName"></span>
@@ -368,6 +371,7 @@
                   <button type="button" onclick="stepAdminImage(-1)" class="flex-1 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs" aria-label="Попереднє фото"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
                   <button type="button" onclick="stepAdminImage(1)" class="flex-1 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs" aria-label="Наступне фото"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
                 </div>
+                <button type="button" onclick="cropCurrentProductImage()" class="w-full py-1.5 rounded-lg bg-slate-800 text-cyan-400 text-xs hover:bg-slate-700"><i class="fa-solid fa-crop-simple mr-1" aria-hidden="true"></i>Кадрувати поточне фото</button>
               </div>
             </div>
             <label for="prodImageUrls" class="block text-xs text-slate-500 mt-2 mb-1">Або вставте прямі HTTP(S)-посилання, по одному в рядку</label>
@@ -422,7 +426,7 @@
   <footer class="border-t border-slate-800/80 bg-slate-950 py-10 mt-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-500 text-sm">
       <div class="flex items-center gap-2">
-        <i class="fa-solid fa-bolt text-cyan-400" aria-hidden="true"></i>
+      <img src="/logo.png" alt="" class="w-6 h-6 object-contain">
         <span>© 2026 <strong data-s="siteName"></strong>. Всі права захищено.</span>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
@@ -623,6 +627,37 @@
     </div>
   </div>
 
+  <!-- IMAGE CROP MODAL -->
+  <div id="cropModal" class="fixed inset-0 z-[65] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cropTitle">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="cancelCropEditor()"></div>
+    <div class="relative w-full max-w-lg max-h-[92vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xl">
+      <h2 id="cropTitle" class="text-lg font-bold text-white">Кадрувати фото</h2>
+      <p class="text-xs text-slate-400 mt-1 mb-4">Перетягніть фото, щоб змінити розміщення. Збільште його, щоб точніше кадрувати.</p>
+      <div id="cropStage" class="rounded-xl border border-slate-700 mx-auto" onpointerdown="startCropDrag(event)" onpointermove="moveCropImage(event)" onpointerup="stopCropDrag(event)" onpointercancel="stopCropDrag(event)">
+        <img id="cropImage" alt="Фото для кадрування" draggable="false">
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <div>
+          <label for="cropAspect" class="block text-xs font-semibold text-slate-400 mb-1">Форма фото</label>
+          <select id="cropAspect" class="field" onchange="changeCropAspect()">
+            <option value="1:1">Квадрат — 1:1</option>
+            <option value="4:3">Альбомна — 4:3</option>
+            <option value="3:4">Портретна — 3:4</option>
+            <option value="16:9">Широка — 16:9</option>
+          </select>
+        </div>
+        <div>
+          <label for="cropZoom" class="block text-xs font-semibold text-slate-400 mb-1">Масштаб</label>
+          <input id="cropZoom" type="range" min="1" max="3" step="0.01" value="1" oninput="changeCropZoom()" class="w-full mt-2 accent-cyan-500">
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button type="button" onclick="cancelCropEditor()" class="flex-1 py-2.5 bg-slate-800 text-slate-300 rounded-xl hover:bg-slate-700 transition text-sm">Скасувати</button>
+        <button type="button" onclick="saveCropEditor()" class="keep-white flex-1 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl text-sm"><i class="fa-solid fa-crop-simple mr-1" aria-hidden="true"></i>Застосувати кадрування</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div id="toast" class="keep-white fixed bottom-5 left-1/2 -translate-x-1/2 z-[70] px-5 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm font-semibold shadow-2xl hidden" role="status" aria-live="polite"></div>
 
@@ -758,6 +793,7 @@
     let preorderProduct = null;
     let productImageIndex = {};
     let adminImageIndex = 0;
+    let cropState = null;
     let detailProductId = null;
     let detailImageIndex = 0;
 
@@ -1453,6 +1489,203 @@
       document.getElementById('prodImageCount').textContent = cleanImages.length ? `${adminImageIndex + 1} з ${cleanImages.length} фото` : 'Фото не додані';
     }
 
+    function cropAspectRatio() {
+      const [width, height] = document.getElementById('cropAspect').value.split(':').map(Number);
+      return width / height;
+    }
+
+    function clampCropPosition() {
+      const stage = document.getElementById('cropStage');
+      const width = stage.clientWidth;
+      const height = stage.clientHeight;
+      const imageWidth = cropState.image.naturalWidth * cropState.scale;
+      const imageHeight = cropState.image.naturalHeight * cropState.scale;
+      cropState.x = Math.min(0, Math.max(width - imageWidth, cropState.x));
+      cropState.y = Math.min(0, Math.max(height - imageHeight, cropState.y));
+    }
+
+    function renderCropPreview(reset = false) {
+      if (!cropState) return;
+      const stage = document.getElementById('cropStage');
+      const maxHeight = window.innerHeight * 0.55;
+      const stageWidth = Math.min(stage.parentElement.clientWidth, maxHeight * cropAspectRatio());
+      stage.style.width = `${stageWidth}px`;
+      stage.style.aspectRatio = document.getElementById('cropAspect').value.replace(':', ' / ');
+
+      const width = stage.clientWidth;
+      const height = stage.clientHeight;
+      const previousWidth = cropState.stageWidth;
+      const previousHeight = cropState.stageHeight;
+      const previousScale = cropState.scale;
+      const focusX = !reset && previousScale ? (previousWidth / 2 - cropState.x) / previousScale : null;
+      const focusY = !reset && previousScale ? (previousHeight / 2 - cropState.y) / previousScale : null;
+      const baseScale = Math.max(width / cropState.image.naturalWidth, height / cropState.image.naturalHeight);
+      cropState.scale = baseScale * cropState.zoom;
+      cropState.stageWidth = width;
+      cropState.stageHeight = height;
+      cropState.x = focusX === null ? (width - cropState.image.naturalWidth * cropState.scale) / 2 : width / 2 - focusX * cropState.scale;
+      cropState.y = focusY === null ? (height - cropState.image.naturalHeight * cropState.scale) / 2 : height / 2 - focusY * cropState.scale;
+      clampCropPosition();
+
+      const image = document.getElementById('cropImage');
+      image.style.width = `${cropState.image.naturalWidth * cropState.scale}px`;
+      image.style.height = `${cropState.image.naturalHeight * cropState.scale}px`;
+      image.style.left = `${cropState.x}px`;
+      image.style.top = `${cropState.y}px`;
+    }
+
+    function openCropEditor(source, filename) {
+      return new Promise((resolve, reject) => {
+        const isLocalFile = typeof source !== 'string';
+        const sourceUrl = isLocalFile ? URL.createObjectURL(source) : source;
+        const image = new Image();
+        image.onload = () => {
+          cropState = {
+            image,
+            filename: filename || (isLocalFile ? source.name : 'product-image.jpg'),
+            objectUrl: isLocalFile ? sourceUrl : '',
+            resolve,
+            zoom: 1,
+            scale: 0,
+            x: 0,
+            y: 0,
+            stageWidth: 0,
+            stageHeight: 0,
+            pointerId: null
+          };
+          document.getElementById('cropAspect').value = '1:1';
+          document.getElementById('cropZoom').value = '1';
+          document.getElementById('cropImage').src = sourceUrl;
+          openModal('cropModal');
+          requestAnimationFrame(() => renderCropPreview(true));
+        };
+        image.onerror = () => {
+          if (isLocalFile) URL.revokeObjectURL(sourceUrl);
+          reject(new Error('Не вдалося відкрити фото. Для зовнішнього посилання потрібен дозвіл CORS.'));
+        };
+        if (!isLocalFile) image.crossOrigin = 'anonymous';
+        image.src = sourceUrl;
+      });
+    }
+
+    function finishCropEditor(result) {
+      if (!cropState) return;
+      const { resolve, objectUrl } = cropState;
+      cropState = null;
+      closeModal('cropModal');
+      document.getElementById('cropImage').removeAttribute('src');
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      resolve(result);
+    }
+
+    function cancelCropEditor() {
+      finishCropEditor(null);
+    }
+
+    function changeCropAspect() {
+      renderCropPreview();
+    }
+
+    function changeCropZoom() {
+      if (!cropState) return;
+      cropState.zoom = Number(document.getElementById('cropZoom').value);
+      renderCropPreview();
+    }
+
+    function startCropDrag(event) {
+      if (!cropState) return;
+      event.preventDefault();
+      cropState.pointerId = event.pointerId;
+      cropState.dragX = event.clientX;
+      cropState.dragY = event.clientY;
+      cropState.dragStartX = cropState.x;
+      cropState.dragStartY = cropState.y;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    function moveCropImage(event) {
+      if (!cropState || cropState.pointerId !== event.pointerId) return;
+      cropState.x = cropState.dragStartX + event.clientX - cropState.dragX;
+      cropState.y = cropState.dragStartY + event.clientY - cropState.dragY;
+      clampCropPosition();
+      const image = document.getElementById('cropImage');
+      image.style.left = `${cropState.x}px`;
+      image.style.top = `${cropState.y}px`;
+    }
+
+    function stopCropDrag(event) {
+      if (cropState && cropState.pointerId === event.pointerId) cropState.pointerId = null;
+    }
+
+    function canvasToBlob(canvas, quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Не вдалося створити обрізане фото')), 'image/jpeg', quality);
+      });
+    }
+
+    async function saveCropEditor() {
+      if (!cropState) return;
+      const stage = document.getElementById('cropStage');
+      const sourceWidth = stage.clientWidth / cropState.scale;
+      const sourceHeight = stage.clientHeight / cropState.scale;
+      const sourceX = Math.max(0, Math.min(cropState.image.naturalWidth - sourceWidth, -cropState.x / cropState.scale));
+      const sourceY = Math.max(0, Math.min(cropState.image.naturalHeight - sourceHeight, -cropState.y / cropState.scale));
+      const outputScale = Math.min(1, 2000 / Math.max(sourceWidth, sourceHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(sourceWidth * outputScale));
+      canvas.height = Math.max(1, Math.round(sourceHeight * outputScale));
+      const context = canvas.getContext('2d');
+      if (!context) return toast('Браузер не підтримує обробку фото');
+      context.drawImage(cropState.image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+
+      try {
+        let blob;
+        for (const quality of [0.85, 0.72, 0.6]) {
+          blob = await canvasToBlob(canvas, quality);
+          if (blob.size <= 3 * 1024 * 1024) break;
+        }
+        if (!blob || blob.size > 3 * 1024 * 1024) throw new Error('Обрізане фото перевищує 3 МБ');
+        const filename = cropState.filename.replace(/\.[^.]+$/, '') + '-crop.jpg';
+        finishCropEditor(new File([blob], filename, { type: 'image/jpeg' }));
+      } catch (error) {
+        toast(`Не вдалося обробити фото: ${error.message}`);
+      }
+    }
+
+    async function uploadOneProductImage(file) {
+      const form = new FormData();
+      form.append('file', file, file.name);
+      const response = await fetch('/api/image-upload', {
+        method: 'POST',
+        headers: { 'x-admin-password': adminPassword },
+        body: form
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(result && result.error ? result.error : `Помилка завантаження (${response.status})`);
+      if (!result || !isImageUrl(result.url)) throw new Error('Сховище не повернуло коректне посилання');
+      return result.url;
+    }
+
+    async function cropCurrentProductImage() {
+      if (!adminPassword) return toast('Спочатку увійдіть у кабінет розробника');
+      let images;
+      try { images = adminImages(); }
+      catch (error) { return toast(error.message); }
+      if (!images.length) return toast('Спочатку додайте фото товару');
+
+      try {
+        const original = images[adminImageIndex];
+        const cropped = await openCropEditor(original, 'product-image.jpg');
+        if (!cropped) return;
+        const url = await uploadOneProductImage(cropped);
+        images[adminImageIndex] = url;
+        setProductImages(images, adminImageIndex);
+        toast('Кадроване фото збережено');
+      } catch (error) {
+        toast(`Не вдалося кадрувати фото: ${error.message}`);
+      }
+    }
+
     function loadProductImageUrls() {
       try {
         const urls = adminImages();
@@ -1482,19 +1715,16 @@
       input.disabled = true;
       const uploaded = [];
       let uploadError;
+      let cancelled = false;
       try {
         for (const file of files) {
-          const form = new FormData();
-          form.append('file', file, file.name);
-          const response = await fetch('/api/image-upload', {
-            method: 'POST',
-            headers: { 'x-admin-password': adminPassword },
-            body: form
-          });
-          const result = await response.json().catch(() => null);
-          if (!response.ok) throw new Error(result && result.error ? result.error : `Помилка завантаження (${response.status})`);
-          if (!result || !isImageUrl(result.url)) throw new Error('Сховище не повернуло коректне посилання');
-          uploaded.push(result.url);
+          const cropped = await openCropEditor(file);
+          if (!cropped) {
+            cancelled = true;
+            break;
+          }
+          const url = await uploadOneProductImage(cropped);
+          uploaded.push(url);
           setProductImages([...existing, ...uploaded], existing.length);
         }
       } catch (error) {
@@ -1507,6 +1737,8 @@
         toast(uploaded.length
           ? `Завантажено ${uploaded.length} з ${files.length}. ${uploadError.message}`
           : `Не вдалося завантажити фото: ${uploadError.message}`);
+      } else if (cancelled) {
+        toast(uploaded.length ? `Завантажено ${uploaded.length} фото. Решту скасовано` : 'Завантаження скасовано');
       } else {
         toast(`Фото завантажено: ${uploaded.length}`);
       }
