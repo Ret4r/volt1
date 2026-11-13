@@ -40,22 +40,31 @@ export default async function handler(req, res) {
     }
 
     // PUT — редагування існуючого товару
-    if (method === 'PUT') {
-      const { id, title, category, capacity, price, specs, image_url } = req.body;
-      const [updated] = await sql`
-        UPDATE products 
-        SET title = ${title}, 
-            category = ${category}, 
-            capacity = ${capacity || 0}, 
-            price = ${price || 0}, 
-            specs = ${JSON.stringify(specs || {})}, 
-            image_url = ${JSON.stringify(image_url || [])}
-        WHERE id = ${id}
+    if (method === 'POST') {
+      const { title, category, capacity, price, specs, image_url } = req.body;
+      
+      // Переконуємось, що image_url це масив (навіть якщо передали рядок або масив)
+      let imagesArray = [];
+      if (Array.isArray(image_url)) {
+        imagesArray = image_url;
+      } else if (typeof image_url === 'string' && image_url.trim()) {
+        imagesArray = image_url.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      const [newProd] = await sql`
+        INSERT INTO products (title, category, capacity, price, specs, image_url)
+        VALUES (
+          ${title}, 
+          ${category}, 
+          ${capacity || 0}, 
+          ${price || 0}, 
+          ${JSON.stringify(specs || {})}, 
+          ${JSON.stringify(imagesArray)}
+        )
         RETURNING *
       `;
-      return res.status(200).json(updated);
+      return res.status(201).json(newProd);
     }
-
     // DELETE — видалення товару за ID
     if (method === 'DELETE') {
       const { id } = query;
