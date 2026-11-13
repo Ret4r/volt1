@@ -827,7 +827,7 @@
              <button onclick="openPreorder(${p.id})" class="w-full py-2.5 border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 font-semibold rounded-xl transition text-sm">Під замовлення за ${money(pre)}</button>`
           : `<button onclick="openPreorder(${p.id})" class="keep-white w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-white font-semibold rounded-xl transition text-sm"><i class="fa-regular fa-clock mr-1.5" aria-hidden="true"></i>Передзамовити</button>`;
         return `
-        <article class="glass rounded-2xl p-4 flex flex-col hover:border-cyan-500/50 transition group">
+        <article class="glass rounded-2xl p-4 flex flex-col hover:border-cyan-500/50 hover:scale-[1.03] hover:z-10 focus-within:scale-[1.03] focus-within:z-10 active:scale-[1.02] transform-gpu transition duration-200 group">
           <div class="h-48 rounded-xl overflow-hidden bg-slate-900 mb-4 relative">
             <img src="${esc(images[imageIndex] || '')}" alt="${esc(p.name)} — фото ${imageIndex + 1}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
             ${badge}
