@@ -29,16 +29,20 @@
     html.light .bg-slate-800 { background-color: #e2e8f0 !important; }
     html.light .hover\:bg-slate-800:hover, html.light .hover\:bg-slate-700:hover { background-color: #cbd5e1 !important; }
     html.light .text-white:not(.keep-white):not(.keep-white *) { color: #0f172a !important; }
-    html.light .text-slate-100, html.light .text-slate-200 { color: #1e293b !important; }
-    html.light .text-slate-300 { color: #334155 !important; }
-    html.light .text-slate-400 { color: #475569 !important; }
-    html.light .text-slate-500, html.light .text-slate-600 { color: #64748b !important; }
-    html.light .text-cyan-400 { color: #0e7490 !important; }
-    html.light .text-amber-400 { color: #b45309 !important; }
+    html.light .text-slate-100, html.light .text-slate-200 { color: #0f172a !important; }
+    html.light .text-slate-300, html.light .text-slate-400 { color: #1e293b !important; }
+    html.light .text-slate-500, html.light .text-slate-600 { color: #334155 !important; }
+    html.light .text-cyan-400 { color: #155e75 !important; }
+    html.light .text-amber-400 { color: #92400e !important; }
+    html.light .text-emerald-400 { color: #065f46 !important; }
+    html.light .text-red-400 { color: #991b1b !important; }
+    html.light .text-sky-400 { color: #075985 !important; }
+    html.light .text-blue-400 { color: #1e40af !important; }
     html.light .border-slate-700, html.light .border-slate-700\/60 { border-color: #cbd5e1 !important; }
     html.light .border-slate-800, html.light .border-slate-800\/80 { border-color: #e2e8f0 !important; }
     html.light .divide-slate-800\/60 > * + * { border-color: #e2e8f0 !important; }
     html.light .field { background: #ffffff; border-color: #cbd5e1; }
+    html.light .product-image-frame { background-color: #e2e8f0 !important; border: 1px solid #cbd5e1; }
     html.light #heroSection { background: linear-gradient(to bottom, #f1f5f9, #e0f2fe, #f1f5f9) !important; }
     html.light .backdrop-dim { background: rgba(15,23,42,0.4) !important; }
   </style>
@@ -477,7 +481,33 @@
         <button id="checkoutLink" type="button" onclick="submitCheckout(true)" class="block text-center w-full py-2 border border-slate-700 text-slate-300 font-semibold rounded-xl hover:border-cyan-500 hover:text-cyan-400 transition">
           <i class="fa-brands fa-telegram mr-1.5" aria-hidden="true"></i> Оформити замовлення через Telegram
         </button>
-        <p class="text-[11px] text-slate-500 text-center">Замовлення з’явиться в кабінеті розробника. Telegram відкриється лише для другого способу.</p>
+        <p class="text-[11px] text-slate-500 text-center">Чат Telegram відкриється лише після оформлення другим способом.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS MODAL -->
+  <div id="orderSuccessModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="orderSuccessTitle">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeModal('orderSuccessModal')"></div>
+    <div class="relative w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center shadow-2xl">
+      <button type="button" onclick="closeModal('orderSuccessModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white" aria-label="Закрити повідомлення"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      <span class="keep-white mx-auto w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-check text-2xl" aria-hidden="true"></i></span>
+      <h2 id="orderSuccessTitle" class="text-xl font-bold text-white mt-4">Дякуємо за покупку!</h2>
+      <p class="text-slate-300 text-sm mt-2">Номер замовлення: <strong id="successOrderNumber" class="text-cyan-400"></strong></p>
+      <p class="text-slate-400 text-sm mt-2">Ваше замовлення прийнято.</p>
+      <button type="button" onclick="closeModal('orderSuccessModal')" class="keep-white w-full mt-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl">Продовжити покупки</button>
+    </div>
+  </div>
+
+  <!-- THEME CHOICE MODAL -->
+  <div id="themeChoiceModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="themeChoiceTitle">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeModal('themeChoiceModal')"></div>
+    <div class="relative w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center shadow-2xl">
+      <h2 id="themeChoiceTitle" class="text-xl font-bold text-white">Оберіть тему сайту</h2>
+      <p class="text-slate-400 text-sm mt-2">Ви зможете змінити її будь-коли кнопкою у верхній частині сайту.</p>
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <button type="button" onclick="chooseTheme('light')" class="py-3 rounded-xl border border-slate-700 bg-white text-slate-900 font-semibold hover:bg-slate-100 transition"><i class="fa-solid fa-sun mr-1.5" aria-hidden="true"></i> Світла</button>
+        <button type="button" onclick="chooseTheme('dark')" class="keep-white py-3 rounded-xl bg-slate-800 text-white font-semibold hover:bg-slate-700 transition"><i class="fa-solid fa-moon mr-1.5" aria-hidden="true"></i> Темна</button>
       </div>
     </div>
   </div>
@@ -488,7 +518,7 @@
     <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl">
       <button type="button" onclick="closeModal('productModal')" class="absolute top-4 right-4 z-10 text-slate-400 hover:text-white" aria-label="Закрити опис товару"><i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i></button>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="relative h-72 sm:h-96 rounded-xl overflow-hidden bg-slate-950">
+        <div class="product-image-frame relative h-72 sm:h-96 rounded-xl overflow-hidden bg-slate-950">
           <img id="detailImage" alt="" class="w-full h-full object-contain">
           <button id="detailPrev" type="button" onclick="stepDetailImage(-1)" class="hidden absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/80 text-white" aria-label="Попереднє фото товару"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
           <button id="detailNext" type="button" onclick="stepDetailImage(1)" class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/80 text-white" aria-label="Наступне фото товару"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
@@ -759,6 +789,10 @@
 
     function openModal(id) { const m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
     function closeModal(id) { const m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+    function showOrderSuccess(orderNumber) {
+      document.getElementById('successOrderNumber').textContent = String(orderNumber);
+      openModal('orderSuccessModal');
+    }
 
     function confirmAction(text, onOk) {
       document.getElementById('confirmText').textContent = text;
@@ -885,7 +919,7 @@
           : `<button onclick="openPreorder(${p.id})" class="keep-white w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-white font-semibold rounded-xl transition text-sm"><i class="fa-regular fa-clock mr-1.5" aria-hidden="true"></i>Передзамовити</button>`;
         return `
         <article onclick="openProductDetails(${p.id}, event)" class="glass rounded-2xl p-4 flex flex-col cursor-pointer hover:border-cyan-500/50 hover:scale-[1.03] hover:z-10 focus-within:scale-[1.03] focus-within:z-10 active:scale-[1.02] transform-gpu transition duration-200 group">
-          <div class="h-56 rounded-xl overflow-hidden bg-slate-900 mb-4 relative">
+          <div class="product-image-frame h-56 rounded-xl overflow-hidden bg-slate-900 mb-4 relative">
             <img src="${esc(images[imageIndex] || '')}" alt="${esc(p.name)} — фото ${imageIndex + 1}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
             ${badge}
             <span class="absolute top-2 right-2 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-cyan-400 border border-slate-700">${esc(p.power)}</span>
@@ -1033,6 +1067,7 @@
         return `<article class="rounded-xl border border-slate-700 bg-slate-950/60 p-4">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
+              <p class="text-xs text-cyan-400 font-semibold">Замовлення №${esc(order.id)}</p>
               <p class="font-bold text-white">${esc(order.customer_name || 'Клієнт')} · ${esc(order.phone || '')}</p>
               <time class="text-xs text-slate-500">${date ? esc(new Date(date).toLocaleString('uk-UA')) : ''}</time>
             </div>
@@ -1157,7 +1192,7 @@
       const price = preOf(preorderProduct);
       const chat = window.open('about:blank', '_blank');
       try {
-        await apiRequest('/api/orders', {
+        const order = await apiRequest('/api/orders', {
           method: 'POST',
           body: JSON.stringify({
             customer_name: res.name,
@@ -1168,8 +1203,11 @@
           })
         });
         closeModal('preorderModal');
+        document.getElementById('preName').value = '';
+        document.getElementById('prePhone').value = '';
+        document.getElementById('preQty').value = 1;
         if (chat) chat.location.href = tgUrl(res.msg);
-        toast(chat ? `Передзамовлення збережено. Відкриваємо чат @${settings.telegram}` : 'Передзамовлення збережено');
+        showOrderSuccess(order.id);
       } catch (error) {
         if (chat) chat.close();
         toast(`Не вдалося зберегти передзамовлення: ${error.message}`);
@@ -1247,7 +1285,7 @@
       const comment = document.getElementById('coComment').value.trim();
       const chat = openTelegram ? window.open('about:blank', '_blank') : null;
       try {
-        await apiRequest('/api/orders', {
+        const order = await apiRequest('/api/orders', {
           method: 'POST',
           body: JSON.stringify({
             customer_name: name,
@@ -1265,12 +1303,13 @@
           })
         });
         cart = [];
-        document.getElementById('coComment').value = '';
+        ['coName', 'coPhone', 'coCity', 'coBranch', 'coComment'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
         updateCart();
+        toggleCart(false);
         if (chat) chat.location.href = tgUrl(msg);
-        toast(chat
-          ? `Дякуємо за покупку! Замовлення прийнято, відкриваємо чат @${settings.telegram}`
-          : 'Дякуємо за покупку! Замовлення надіслано в кабінет розробника.');
+        showOrderSuccess(order.id);
       } catch (error) {
         if (chat) chat.close();
         toast(`Не вдалося оформити замовлення: ${error.message}`);
@@ -1637,10 +1676,19 @@
       document.getElementById('themeIcon').className = `fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'} text-base sm:text-lg`;
       store.set('volt_theme', theme);
     }
-    function toggleTheme() { applyTheme(document.documentElement.classList.contains('light') ? 'dark' : 'light'); }
+    function chooseTheme(theme) {
+      applyTheme(theme);
+      store.set('volt_theme_choice', true);
+      closeModal('themeChoiceModal');
+    }
+
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('light') ? 'dark' : 'light');
+      store.set('volt_theme_choice', true);
+    }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { ['productModal', 'preorderModal', 'loginModal', 'confirmModal'].forEach(closeModal); toggleCart(false); }
+      if (e.key === 'Escape') { ['productModal', 'preorderModal', 'loginModal', 'confirmModal', 'orderSuccessModal', 'themeChoiceModal'].forEach(closeModal); toggleCart(false); }
     });
 
     applyTheme(store.get('volt_theme', 'dark'));
@@ -1650,6 +1698,7 @@
     renderReviews();
     updateReqBadge();
     loadStoreData();
+    if (!store.get('volt_theme_choice', false)) openModal('themeChoiceModal');
   </script>
 </body>
 </html>
