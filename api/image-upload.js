@@ -73,14 +73,16 @@ export default async function handler(req, res) {
     file = await parseUpload(req);
   } catch (error) {
     const message = error && error.message ? error.message : 'Не вдалося прочитати файл';
+    console.warn('[image-upload] Request rejected:', message);
     return res.status(400).json({ error: message });
   }
   if (!matchesImageType(file.buffer, file.contentType)) {
+    console.warn('[image-upload] File signature does not match MIME type:', file.contentType);
     return res.status(400).json({ error: 'Вміст файлу не відповідає формату зображення' });
   }
 
-  const safeName = file.filename.replace(/[^a-zA-Z0-9._-]/g, '_') || 'product-image';
   try {
+    const safeName = (file.filename || 'product-image').replace(/[^a-zA-Z0-9._-]/g, '_');
     const blob = await put(`products/${Date.now()}-${safeName}`, file.buffer, {
       access: 'public',
       addRandomSuffix: true,
@@ -90,6 +92,7 @@ export default async function handler(req, res) {
     return res.status(201).json({ url: blob.url });
   } catch (error) {
     const message = error && error.message ? error.message : 'Не вдалося завантажити зображення';
+    console.error('[image-upload] Blob upload failed:', error);
     return res.status(502).json({ error: message });
   }
 }
