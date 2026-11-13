@@ -472,6 +472,51 @@
     </div>
   </div>
 
+  <!-- PRODUCT DETAILS MODAL -->
+  <div id="productModal" class="fixed inset-0 z-[55] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeModal('productModal')"></div>
+    <div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl">
+      <button type="button" onclick="closeModal('productModal')" class="absolute top-4 right-4 z-10 text-slate-400 hover:text-white" aria-label="Закрити опис товару"><i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i></button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="relative h-64 sm:h-80 rounded-xl overflow-hidden bg-slate-950">
+          <img id="detailImage" alt="" class="w-full h-full object-contain">
+          <button id="detailPrev" type="button" onclick="stepDetailImage(-1)" class="hidden absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/80 text-white" aria-label="Попереднє фото товару"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+          <button id="detailNext" type="button" onclick="stepDetailImage(1)" class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-950/80 text-white" aria-label="Наступне фото товару"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+          <span id="detailImageCount" class="hidden absolute bottom-2 right-2 bg-slate-950/80 text-white text-xs px-2 py-1 rounded-md"></span>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <span id="detailCategory" class="text-xs font-semibold uppercase tracking-wider text-cyan-400"></span>
+            <h2 id="detailTitle" class="text-2xl font-bold text-white mt-1 pr-8"></h2>
+          </div>
+          <p id="detailStock" class="text-sm font-semibold"></p>
+          <p id="detailDescription" class="text-sm text-slate-300 whitespace-pre-line"></p>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+              <span class="block text-xs text-slate-400">Ємність / потужність</span>
+              <span id="detailCapacity" class="block font-semibold text-white mt-1"></span>
+              <span id="detailPower" class="block text-cyan-400 mt-1"></span>
+            </div>
+            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+              <span class="block text-xs text-slate-400">Термін очікування</span>
+              <span id="detailWait" class="block font-semibold text-white mt-1"></span>
+            </div>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+            <span id="detailPriceLabel" class="block text-xs text-slate-400"></span>
+            <span id="detailPrice" class="block text-2xl font-extrabold text-white mt-1"></span>
+            <span id="detailOldPrice" class="block text-xs text-emerald-400 mt-1"></span>
+          </div>
+          <p class="text-xs text-emerald-400"><i class="fa-solid fa-money-bill-wave mr-1" aria-hidden="true"></i> Оплата післяплатою у відділенні пошти</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+        <button id="detailBuyButton" type="button" onclick="buyDetailProduct()" class="keep-white hidden py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl hover:opacity-90 transition"><i class="fa-solid fa-cart-plus mr-1.5" aria-hidden="true"></i> Купити зараз</button>
+        <button id="detailPreorderButton" type="button" onclick="preorderDetailProduct()" class="py-3 border border-amber-500/40 text-amber-400 font-semibold rounded-xl hover:bg-amber-500/10 transition"><i class="fa-regular fa-clock mr-1.5" aria-hidden="true"></i> <span id="detailPreorderLabel">Під замовлення</span></button>
+      </div>
+    </div>
+  </div>
+
   <!-- PREORDER MODAL -->
   <div id="preorderModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="preTitle">
     <div class="backdrop-dim absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onclick="closeModal('preorderModal')"></div>
@@ -673,6 +718,8 @@
     let preorderProduct = null;
     let productImageIndex = {};
     let adminImageIndex = 0;
+    let detailProductId = null;
+    let detailImageIndex = 0;
 
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const money = n => Number(n || 0).toLocaleString('uk-UA') + ' грн';
@@ -827,7 +874,7 @@
              <button onclick="openPreorder(${p.id})" class="w-full py-2.5 border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 font-semibold rounded-xl transition text-sm">Під замовлення за ${money(pre)}</button>`
           : `<button onclick="openPreorder(${p.id})" class="keep-white w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-white font-semibold rounded-xl transition text-sm"><i class="fa-regular fa-clock mr-1.5" aria-hidden="true"></i>Передзамовити</button>`;
         return `
-        <article class="glass rounded-2xl p-4 flex flex-col hover:border-cyan-500/50 hover:scale-[1.03] hover:z-10 focus-within:scale-[1.03] focus-within:z-10 active:scale-[1.02] transform-gpu transition duration-200 group">
+        <article onclick="openProductDetails(${p.id}, event)" class="glass rounded-2xl p-4 flex flex-col cursor-pointer hover:border-cyan-500/50 hover:scale-[1.03] hover:z-10 focus-within:scale-[1.03] focus-within:z-10 active:scale-[1.02] transform-gpu transition duration-200 group">
           <div class="h-48 rounded-xl overflow-hidden bg-slate-900 mb-4 relative">
             <img src="${esc(images[imageIndex] || '')}" alt="${esc(p.name)} — фото ${imageIndex + 1}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
             ${badge}
@@ -839,6 +886,7 @@
           <span class="text-[11px] font-semibold uppercase tracking-wider text-cyan-400">${catLabel(p.cat)}</span>
           <h3 class="font-bold text-white text-base mb-1">${esc(p.name)}</h3>
           <p class="text-slate-400 text-xs mb-3 line-clamp-2">${esc(p.desc)}</p>
+          <button type="button" onclick="openProductDetails(${p.id})" class="text-left text-xs font-semibold text-cyan-400 hover:text-cyan-300 mb-3" aria-label="Детальніше про товар ${esc(p.name)}">Детальніше про товар <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></button>
           <div class="mt-auto">
             <div class="flex items-end justify-between gap-2 mb-2">
               <div>
@@ -862,6 +910,71 @@
       if (!product || !product.images || product.images.length < 2) return;
       productImageIndex[id] = ((productImageIndex[id] || 0) + direction + product.images.length) % product.images.length;
       renderProducts();
+    }
+
+    function openProductDetails(id, event) {
+      if (event && event.target.closest('button, a, input, select, textarea')) return;
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      detailProductId = id;
+      detailImageIndex = 0;
+      renderProductDetails();
+      openModal('productModal');
+    }
+
+    function renderProductDetails() {
+      const product = products.find(p => p.id === detailProductId);
+      if (!product) return;
+      const images = Array.isArray(product.images) && product.images.length ? product.images : [product.img];
+      detailImageIndex = ((detailImageIndex % images.length) + images.length) % images.length;
+      const image = images[detailImageIndex];
+      const detailImage = document.getElementById('detailImage');
+      if (image) detailImage.src = image;
+      else detailImage.removeAttribute('src');
+      detailImage.alt = `${product.name} — фото ${detailImageIndex + 1}`;
+      document.getElementById('detailImageCount').textContent = `${detailImageIndex + 1}/${images.length}`;
+      document.getElementById('detailImageCount').classList.toggle('hidden', images.length < 2);
+      document.getElementById('detailPrev').classList.toggle('hidden', images.length < 2);
+      document.getElementById('detailNext').classList.toggle('hidden', images.length < 2);
+      document.getElementById('detailCategory').textContent = catLabel(product.cat);
+      document.getElementById('detailTitle').textContent = product.name;
+      const stock = document.getElementById('detailStock');
+      stock.textContent = product.stock ? 'В наявності — можна додати до кошика' : 'Зараз немає в наявності';
+      stock.className = `text-sm font-semibold ${product.stock ? 'text-emerald-400' : 'text-amber-400'}`;
+      document.getElementById('detailDescription').textContent = product.desc || 'Опис товару ще не додано.';
+      document.getElementById('detailCapacity').textContent = `${Number(product.cap).toLocaleString('uk-UA')} ${unitOf(product.cat)}`;
+      document.getElementById('detailPower').textContent = product.power || '';
+      document.getElementById('detailWait').textContent = product.wait || '≈ 3 тижні';
+      document.getElementById('detailPriceLabel').textContent = product.stock ? 'Ціна в наявності' : 'Ціна під замовлення';
+      document.getElementById('detailPrice').textContent = money(product.stock ? product.price : preOf(product));
+      const preorderPrice = preOf(product);
+      document.getElementById('detailOldPrice').textContent = product.stock && preorderPrice < product.price
+        ? `Під замовлення: ${money(preorderPrice)}`
+        : '';
+      document.getElementById('detailBuyButton').classList.toggle('hidden', !product.stock);
+      document.getElementById('detailPreorderLabel').textContent = product.stock ? 'Під замовлення' : 'Передзамовити';
+    }
+
+    function stepDetailImage(direction) {
+      const product = products.find(p => p.id === detailProductId);
+      const images = product && Array.isArray(product.images) && product.images.length ? product.images : product ? [product.img] : [];
+      if (images.length < 2) return;
+      detailImageIndex = (detailImageIndex + direction + images.length) % images.length;
+      renderProductDetails();
+    }
+
+    function buyDetailProduct() {
+      if (detailProductId === null) return;
+      const id = detailProductId;
+      closeModal('productModal');
+      addToCart(id);
+    }
+
+    function preorderDetailProduct() {
+      if (detailProductId === null) return;
+      const id = detailProductId;
+      closeModal('productModal');
+      openPreorder(id);
     }
 
     const preOf = p => (p.pre > 0 ? p.pre : p.price);
@@ -1509,7 +1622,7 @@
     function toggleTheme() { applyTheme(document.documentElement.classList.contains('light') ? 'dark' : 'light'); }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { ['preorderModal', 'loginModal', 'confirmModal'].forEach(closeModal); toggleCart(false); }
+      if (e.key === 'Escape') { ['productModal', 'preorderModal', 'loginModal', 'confirmModal'].forEach(closeModal); toggleCart(false); }
     });
 
     applyTheme(store.get('volt_theme', 'dark'));
