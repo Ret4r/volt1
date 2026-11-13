@@ -110,6 +110,7 @@
           <div class="flex flex-wrap justify-center gap-2 text-xs sm:text-sm">
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Павербанки в наявності — відправка 1–2 дні</span>
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400"><i class="fa-regular fa-clock" aria-hidden="true"></i> Під замовлення дешевше (≈ 3 тижні)</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400"><i class="fa-solid fa-battery-full" aria-hidden="true"></i> Нові Li-ion акумулятори з Нідерландів</span>
           </div>
         </div>
       </div>
@@ -459,13 +460,14 @@
           <label for="coDelivery" class="block text-xs font-semibold text-slate-400 mb-1">Доставка / коментар</label>
           <input id="coDelivery" type="text" autocomplete="street-address" class="field" placeholder="Місто, відділення або адреса">
         </div>
-        <button id="checkoutLink" type="button" onclick="submitCheckout(true)" class="keep-white block text-center w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl neon-glow hover:opacity-90 transition">
-          <i class="fa-brands fa-telegram mr-1.5" aria-hidden="true"></i> Оформити замовлення
+        <p class="text-xs text-emerald-400 flex items-center gap-1.5"><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i> Оплата післяплатою у відділенні пошти</p>
+        <button id="checkoutOnlyButton" type="button" onclick="submitCheckout(false)" class="keep-white block text-center w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl neon-glow hover:opacity-90 transition">
+          <i class="fa-solid fa-clipboard-check mr-1.5" aria-hidden="true"></i> Оформити замовлення
         </button>
-        <button id="checkoutOnlyButton" type="button" onclick="submitCheckout(false)" class="block text-center w-full py-3 border border-slate-700 text-slate-300 font-semibold rounded-xl hover:border-cyan-500 hover:text-cyan-400 transition">
-          <i class="fa-solid fa-clipboard-check mr-1.5" aria-hidden="true"></i> Оформити без Telegram
+        <button id="checkoutLink" type="button" onclick="submitCheckout(true)" class="block text-center w-full py-3 border border-slate-700 text-slate-300 font-semibold rounded-xl hover:border-cyan-500 hover:text-cyan-400 transition">
+          <i class="fa-brands fa-telegram mr-1.5" aria-hidden="true"></i> Оформити замовлення через Telegram
         </button>
-        <p class="text-[11px] text-slate-500 text-center">Замовлення з’явиться в кабінеті розробника. Telegram відкриється лише для першого способу.</p>
+        <p class="text-[11px] text-slate-500 text-center">Замовлення з’явиться в кабінеті розробника. Telegram відкриється лише для другого способу.</p>
       </div>
     </div>
   </div>
@@ -1135,7 +1137,9 @@
         cart = [];
         updateCart();
         if (chat) chat.location.href = tgUrl(msg);
-        toast(chat ? `Замовлення збережено. Відкриваємо чат @${settings.telegram}` : 'Замовлення надіслано в кабінет розробника');
+        toast(chat
+          ? `Дякуємо за покупку! Замовлення прийнято, відкриваємо чат @${settings.telegram}`
+          : 'Дякуємо за покупку! Замовлення надіслано в кабінет розробника.');
       } catch (error) {
         if (chat) chat.close();
         toast(`Не вдалося оформити замовлення: ${error.message}`);
