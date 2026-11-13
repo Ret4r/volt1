@@ -2,6 +2,36 @@ import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
 
+function normalizeImageUrls(value) {
+  let images = value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      images = Array.isArray(parsed) ? parsed : [value];
+    } catch {
+      images = [value];
+    }
+  }
+  if (!Array.isArray(images) || images.length === 0 || images.length > 8) {
+    return { error: 'Додайте від 1 до 8 посилань на фото' };
+  }
+
+  const urls = images.map(image => typeof image === 'string' ? image.trim() : '');
+  const valid = urls.every(image => {
+    if (!image || /^data:/i.test(image)) return false;
+    if (/^https?:\/\//i.test(image)) {
+      try {
+        const url = new URL(image);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    }
+    return /^(?:\/(?!\/)|\.{1,2}\/)/.test(image);
+  });
+  return valid ? { images: [...new Set(urls)] } : { error: 'Фото мають бути HTTP(S)-посиланнями або локальними шляхами' };
+}
+
 export default async function handler(req, res) {
   // Додаємо заголовки CORS та підтримку OPTIONS запитів від браузера
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -37,13 +67,8 @@ export default async function handler(req, res) {
     // POST — додавання нового товару
     if (method === 'POST') {
       const { title, category, capacity, price, specs, image_url } = req.body;
-      
-      let imagesArray = [];
-      if (Array.isArray(image_url)) {
-        imagesArray = image_url;
-      } else if (typeof image_url === 'string' && image_url.trim()) {
-        imagesArray = image_url.split(',').map(s => s.trim()).filter(Boolean);
-      }
+      const normalized = normalizeImageUrls(image_url);
+      if (normalized.error) return res.status(400).json({ error: normalized.error });
 
       const [newProd] = await sql`
         INSERT INTO products (title, category, capacity, price, specs, image_url)
@@ -53,7 +78,7 @@ export default async function handler(req, res) {
           ${capacity || 0}, 
           ${price || 0}, 
           ${JSON.stringify(specs || {})}, 
-          ${JSON.stringify(imagesArray)}
+          ${JSON.stringify(normalized.images)}
         )
         RETURNING *
       `;
@@ -63,13 +88,8 @@ export default async function handler(req, res) {
     // PUT — редагування існуючого товару (ВИПРАВЛЕНО з POST на PUT і додано id)
     if (method === 'PUT') {
       const { id, title, category, capacity, price, specs, image_url } = req.body;
-      
-      let imagesArray = [];
-      if (Array.isArray(image_url)) {
-        imagesArray = image_url;
-      } else if (typeof image_url === 'string' && image_url.trim()) {
-        imagesArray = image_url.split(',').map(s => s.trim()).filter(Boolean);
-      }
+      const normalized = normalizeImageUrls(image_url);
+      if (normalized.error) return res.status(400).json({ error: normalized.error });
 
       const [updated] = await sql`
         UPDATE products 
@@ -78,7 +98,7 @@ export default async function handler(req, res) {
             capacity = ${capacity || 0}, 
             price = ${price || 0}, 
             specs = ${JSON.stringify(specs || {})}, 
-            image_url = ${JSON.stringify(imagesArray)}
+            image_url = ${JSON.stringify(normalized.images)}
         WHERE id = ${id}
         RETURNING *
       `;
