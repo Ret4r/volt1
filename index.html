@@ -457,8 +457,16 @@
           </div>
         </div>
         <div>
-          <label for="coDelivery" class="block text-xs font-semibold text-slate-400 mb-1">Доставка / коментар</label>
-          <input id="coDelivery" type="text" autocomplete="street-address" class="field" placeholder="Місто, відділення або адреса">
+          <label for="coCity" class="block text-xs font-semibold text-slate-400 mb-1">Місто</label>
+          <input id="coCity" type="text" autocomplete="address-level2" class="field" placeholder="Ваше місто">
+        </div>
+        <div>
+          <label for="coBranch" class="block text-xs font-semibold text-slate-400 mb-1">Відділення</label>
+          <input id="coBranch" type="text" class="field" placeholder="Номер або адреса відділення">
+        </div>
+        <div>
+          <label for="coComment" class="block text-xs font-semibold text-slate-400 mb-1">Коментар до замовлення <span class="font-normal text-slate-500">(необов’язково)</span></label>
+          <textarea id="coComment" rows="3" maxlength="500" class="field resize-y" placeholder="Додаткова інформація до замовлення"></textarea>
         </div>
         <p class="text-xs text-emerald-400 flex items-center gap-1.5"><i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i> Оплата післяплатою у відділенні пошти</p>
         <button id="checkoutOnlyButton" type="button" onclick="submitCheckout(false)" class="keep-white block text-center w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl neon-glow hover:opacity-90 transition">
@@ -1029,7 +1037,7 @@
             <strong class="text-cyan-400">${money(order.total_price)}</strong>
           </div>
           <p class="text-slate-300 text-sm mt-2">${itemText}</p>
-          ${order.delivery_info ? `<p class="text-slate-400 text-xs mt-1">Доставка: ${esc(order.delivery_info)}</p>` : ''}
+          ${order.delivery_info ? `<p class="text-slate-400 text-xs mt-1 whitespace-pre-line">${esc(order.delivery_info)}</p>` : ''}
           <div class="flex flex-wrap items-center gap-2 mt-3">
             <label class="text-xs text-slate-400" for="orderStatus-${esc(order.id)}">Статус</label>
             <select id="orderStatus-${esc(order.id)}" class="field !w-auto !py-1.5" onchange="changeOrderStatus(${Number(order.id)}, this.value)">
@@ -1216,9 +1224,11 @@
     function checkoutMessage(lines, total) {
       const name = document.getElementById('coName').value.trim();
       const phone = document.getElementById('coPhone').value.trim();
-      const delivery = document.getElementById('coDelivery').value.trim();
+      const city = document.getElementById('coCity').value.trim();
+      const branch = document.getElementById('coBranch').value.trim();
+      const comment = document.getElementById('coComment').value.trim();
       const items = lines.map(l => `• ${l.p.name} — ${l.qty} шт. × ${money(l.p.price)}`).join('\n');
-      return `Вітаю! Хочу оформити замовлення:\n${items}\nСума: ${money(total)}\n\nІм'я: ${name}\nТелефон: ${phone}${delivery ? `\nДоставка: ${delivery}` : ''}`;
+      return `Вітаю! Хочу оформити замовлення:\n${items}\nСума: ${money(total)}\n\nІм'я: ${name}\nТелефон: ${phone}${city ? `\nМісто: ${city}` : ''}${branch ? `\nВідділення: ${branch}` : ''}${comment ? `\nКоментар: ${comment}` : ''}`;
     }
 
     async function submitCheckout(openTelegram = true) {
@@ -1230,6 +1240,9 @@
       if (!validPhone(phone)) { toast('Вкажіть коректний номер телефону'); document.getElementById('coPhone').focus(); return false; }
       const total = lines.reduce((s, l) => s + l.p.price * l.qty, 0);
       const msg = checkoutMessage(lines, total);
+      const city = document.getElementById('coCity').value.trim();
+      const branch = document.getElementById('coBranch').value.trim();
+      const comment = document.getElementById('coComment').value.trim();
       const chat = openTelegram ? window.open('about:blank', '_blank') : null;
       try {
         await apiRequest('/api/orders', {
@@ -1237,7 +1250,9 @@
           body: JSON.stringify({
             customer_name: name,
             phone,
-            delivery_info: document.getElementById('coDelivery').value.trim(),
+            delivery_city: city,
+            delivery_branch: branch,
+            comment,
             items: lines.map(line => ({
               product_id: line.p.id,
               name: line.p.name,
@@ -1248,6 +1263,7 @@
           })
         });
         cart = [];
+        document.getElementById('coComment').value = '';
         updateCart();
         if (chat) chat.location.href = tgUrl(msg);
         toast(chat
