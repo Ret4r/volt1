@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#020617">
+  <title>Реєстрація — ВольтЗапас</title>
+  <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/auth.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><img src="/logo.svg" alt="">ВольтЗапас</a>
+    <a class="toplink" href="/">До магазину</a>
+  </header>
+  <main class="shell">
+    <section class="card">
+      <h1>Створити акаунт</h1>
+      <p class="intro muted">Підтвердіть email, щоб стежити за статусами замовлень.</p>
+      <form id="registerForm" class="form">
+        <div class="field-wrap">
+          <label for="fullName">Ім’я</label>
+          <input id="fullName" name="full_name" autocomplete="name" maxlength="100" required>
+        </div>
+        <div class="field-wrap">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+        </div>
+        <div class="field-wrap">
+          <label for="password">Пароль</label>
+          <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+          <span class="muted" style="font-size:12px">Щонайменше 8 символів, велика й мала літера та цифра.</span>
+        </div>
+        <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
+        <button id="sendCode" class="button" type="submit">Надіслати код підтвердження</button>
+        <div id="verificationFields" class="form hidden">
+          <div class="field-wrap">
+            <label for="code">6-значний код з листа</label>
+            <input id="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
+          </div>
+          <button class="button" type="button" id="verifyButton">Підтвердити email</button>
+        </div>
+      </form>
+      <div class="divider"></div>
+      <p class="muted" style="margin:0">Вже маєте акаунт? <a href="/login">Увійти</a></p>
+    </section>
+  </main>
+  <script>
+    const request = async (url, body) => {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(body)
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Сталася помилка');
+      return data;
+    };
+    const message = (text, success = false) => {
+      const element = document.getElementById('registerMessage');
+      element.textContent = text;
+      element.classList.toggle('success', success);
+    };
+    const registerData = () => ({
+      full_name: document.getElementById('fullName').value,
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = document.getElementById('sendCode');
+      button.disabled = true;
+      message('');
+      try {
+        const result = await request('/api/auth/register', registerData());
+        document.getElementById('verificationFields').classList.remove('hidden');
+        document.getElementById('code').required = true;
+        message(result.message, true);
+      } catch (error) {
+        message(error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    document.getElementById('verifyButton').addEventListener('click', async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      message('');
+      try {
+        await request('/api/auth/verify', {
+          email: document.getElementById('email').value,
+          code: document.getElementById('code').value
+        });
+        location.assign('/account');
+      } catch (error) {
+        message(error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
